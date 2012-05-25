@@ -1,0 +1,215 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mongolier.db &mdash; mongolier alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mongolier alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mongolier alpha documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mongolier.db</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">A base class for connecting to the Post Mongo DB</span>
+<span class="sd">    hosted on ec2 @ data.washingtonpost.com</span>
+
+<span class="sd">Usage:</span>
+
+<span class="sd">mongo_object = connect.MongoConnection(port=222, host=&#39;myhost&#39;)</span>
+
+<span class="sd">mongo_connection = mongo_object.connect()</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">pymongo</span> <span class="kn">import</span> <span class="n">Connection</span>
+<span class="kn">from</span> <span class="nn">pymongo.errors</span> <span class="kn">import</span> <span class="n">AutoReconnect</span><span class="p">,</span> <span class="n">ConnectionFailure</span><span class="p">,</span> <span class="n">OperationFailure</span>
+<span class="kn">from</span> <span class="nn">gridfs</span> <span class="kn">import</span> <span class="n">GridFS</span>
+<span class="kn">from</span> <span class="nn">mongolier.exceptions</span> <span class="kn">import</span> <span class="n">IncorrectParameters</span>
+
+<div class="viewcode-block" id="MongoConnection"><a class="viewcode-back" href="../../mongolier.html#mongolier.db.MongoConnection">[docs]</a><span class="k">class</span> <span class="nc">MongoConnection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Instantiate the Mongo class</span>
+<span class="sd">        </span>
+<span class="sd">        This can take up to four optional arguments, all of which help</span>
+<span class="sd">            connect to the right database</span>
+<span class="sd">            </span>
+<span class="sd">        Optional args:</span>
+<span class="sd">        :: port</span>
+<span class="sd">        Port where you post Mongo data to</span>
+<span class="sd">        :: localhost</span>
+<span class="sd">        Mongo database host</span>
+<span class="sd">        :: db</span>
+<span class="sd">        Mongo db, a db is a series of collections</span>
+<span class="sd">        :: auth</span>
+<span class="sd">        A string that contains username and password, separated by :</span>
+<span class="sd">        For example</span>
+<span class="sd">            testuser:testpassword</span>
+<span class="sd">        </span>
+<span class="sd">        :: collection</span>
+<span class="sd">        Collection, where the actual data is stored</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;port&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="mi">27017</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;host&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="s">&#39;localhost&#39;</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;db&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="s">&#39;test_db&#39;</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;collection&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collection</span> <span class="o">=</span> <span class="s">&#39;test_col&#39;</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;auth&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auth</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;retries&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span> <span class="o">=</span> <span class="mi">2</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_retrires</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_connect_to_db</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Connect to the database, but do not initialize a connection.</span>
+<span class="sd">        </span>
+<span class="sd">        Depending on which public method is used, it initiates either a standard</span>
+<span class="sd">            mongo connection or a gridfs connection</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+            
+            <span class="n">database</span> <span class="o">=</span> <span class="n">connection</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">auth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">IncorrectParameters</span><span class="p">(</span><span class="s">&#39;Incorrect auth params, you passed </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="p">)</span>
+                
+                <span class="n">database</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span> <span class="n">AutoReconnect</span><span class="p">,</span> <span class="n">error_message</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retries</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_connect_to_db</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConnectionFailure</span><span class="p">(</span><span class="s">&#39;Max number of retries (</span><span class="si">%s</span><span class="s">) reached. Error: </span><span class="si">%s</span><span class="s">&#39;</span>\
+                                         <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span><span class="p">,</span> <span class="n">error_message</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">OperationFailure</span><span class="p">,</span> <span class="n">error_message</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retries</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_connect_to_db</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">OperationFailure</span><span class="p">(</span><span class="s">&#39;Max number of retries (</span><span class="si">%s</span><span class="s">) reached. Error: </span><span class="si">%s</span><span class="s">&#39;</span>\
+                                         <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span><span class="p">,</span> <span class="n">error_message</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">database</span>
+        
+<div class="viewcode-block" id="MongoConnection.connect"><a class="viewcode-back" href="../../mongolier.html#mongolier.db.MongoConnection.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Connect to the mongo instance</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect_to_db</span><span class="p">()</span>
+
+        <span class="n">collection</span> <span class="o">=</span> <span class="n">database</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">collection</span>
+    </div>
+<div class="viewcode-block" id="MongoConnection.gridfs"><a class="viewcode-back" href="../../mongolier.html#mongolier.db.MongoConnection.gridfs">[docs]</a>    <span class="k">def</span> <span class="nf">gridfs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        A module to connect to GridFS and chunk large files for saving into mongo</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect_to_db</span><span class="p">()</span>
+        
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">GridFS</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">grid</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mongolier alpha documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright Jason Bartz and Jeremy Bowers.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

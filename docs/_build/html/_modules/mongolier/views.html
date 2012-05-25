@@ -1,0 +1,378 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mongolier.views &mdash; mongolier alpha documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'alpha',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="mongolier alpha documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mongolier alpha documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for mongolier.views</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">views.py</span>
+
+<span class="sd">A module that replicates django&#39;s class based views for mongodb</span>
+
+<span class="sd">I am sure everyone has something like this already.</span>
+<span class="sd">I think PyDanny may have even built this into Django-Mongonaut.</span>
+<span class="sd">But I needed to have this without installing any extra stuff.</span>
+<span class="sd">Please enjoy version 0.0.3 of my class-based list/detail views for PyMongo.</span>
+<span class="sd">    -Jeremy</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">django.db.settings</span> <span class="kn">import</span> <span class="n">DEFAULT_PAGINATION</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">DEFAULT_PAGINATION</span> <span class="o">=</span> <span class="mi">25</span>
+
+<span class="kn">from</span> <span class="nn">django.views.generic.base</span> <span class="kn">import</span> <span class="n">View</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span><span class="p">,</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.template.response</span> <span class="kn">import</span> <span class="n">TemplateResponse</span>
+
+<span class="kn">from</span> <span class="nn">bson.objectid</span> <span class="kn">import</span> <span class="n">ObjectId</span>
+<span class="kn">from</span> <span class="nn">mongolier</span> <span class="kn">import</span> <span class="n">MongoConnection</span>
+
+<div class="viewcode-block" id="BaseMongoMixin"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.BaseMongoMixin">[docs]</a><span class="k">class</span> <span class="nc">BaseMongoMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">db_name</span>                     <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">collection_name</span>             <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">query_sort</span>                  <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">query_results</span>               <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">query_dict</span>                  <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">context_object_name</span>         <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">template_name</span>               <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">class_type</span>                  <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">auth_string</span>                 <span class="o">=</span> <span class="bp">None</span>
+    
+<div class="viewcode-block" id="BaseMongoMixin.get_context_data"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.BaseMongoMixin.get_context_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span>                             <span class="o">=</span> <span class="p">{</span> <span class="s">&#39;object_list&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_results</span> <span class="p">}</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">context_object_name</span><span class="p">]</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_results</span>
+        <span class="k">return</span> <span class="n">context</span>
+    </div>
+<div class="viewcode-block" id="BaseMongoMixin.get_template_name"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.BaseMongoMixin.get_template_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_template_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_name</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">u&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">_</span><span class="si">%s</span><span class="s">.html&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_type</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_name</span>
+    </div>
+<div class="viewcode-block" id="BaseMongoMixin.render_to_response"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.BaseMongoMixin.render_to_response">[docs]</a>    <span class="k">def</span> <span class="nf">render_to_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TemplateResponse</span><span class="p">(</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">,</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_template_name</span><span class="p">(),</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+        <span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="BasePaginatedMongoMixin"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.BasePaginatedMongoMixin">[docs]</a><span class="k">class</span> <span class="nc">BasePaginatedMongoMixin</span><span class="p">(</span><span class="n">BaseMongoMixin</span><span class="p">):</span>
+    <span class="n">pages</span>                       <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">page</span>                        <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">next_page_number</span>            <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">previous_page_number</span>        <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">offset</span>                      <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pagination_limit</span>            <span class="o">=</span> <span class="n">DEFAULT_PAGINATION</span>
+    <span class="n">page_range</span>                  <span class="o">=</span> <span class="bp">None</span>
+    
+<div class="viewcode-block" id="BasePaginatedMongoMixin.get_context_data"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.BasePaginatedMongoMixin.get_context_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">BasePaginatedMongoMixin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;page&#39;</span><span class="p">]</span>                     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;pages&#39;</span><span class="p">]</span>                    <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;page_range&#39;</span><span class="p">]</span>               <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_range</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;previous_page_number&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_page_number</span>
+        <span class="n">context</span><span class="p">[</span><span class="s">&#39;next_page_number&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_page_number</span>
+        <span class="k">return</span> <span class="n">context</span>
+</div></div>
+<div class="viewcode-block" id="DetailView"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.DetailView">[docs]</a><span class="k">class</span> <span class="nc">DetailView</span><span class="p">(</span><span class="n">BaseMongoMixin</span><span class="p">,</span> <span class="n">View</span><span class="p">):</span>
+    <span class="n">class_type</span>          <span class="o">=</span> <span class="s">&#39;detail&#39;</span>
+    
+<div class="viewcode-block" id="DetailView.get_object"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.DetailView.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">mongo_object</span>        <span class="o">=</span> <span class="n">MongoConnection</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auth_string</span><span class="p">)</span>
+        <span class="n">connection</span>          <span class="o">=</span> <span class="n">mongo_object</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">query</span>               <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span><span class="n">ObjectId</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">query_filter</span><span class="p">[</span><span class="s">&#39;kwargs&#39;</span><span class="p">][</span><span class="s">&#39;url_kwarg&#39;</span><span class="p">]])))</span>
+        <span class="k">if</span> <span class="n">query</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">u&quot;List is empty.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">query</span><span class="p">,</span> <span class="s">&#39;query&#39;</span>
+        </div>
+<div class="viewcode-block" id="DetailView.get"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.DetailView.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overrides the built in get() function on the base View class.</span>
+<span class="sd">        Gets the object and the context.</span>
+<span class="sd">        Returns a redirect if there&#39;s an issue with the page number.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># If the type of response is a query:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;query&#39;</span><span class="p">:</span>
+            
+            <span class="c"># Set the results to the first part of the tuple.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            
+            <span class="c"># If there are no results ...</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                
+                <span class="c">#... raise a 404.</span>
+                <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">u&quot;List is empty.&quot;</span><span class="p">)</span>
+                
+            <span class="c"># If there are results, set the context data.</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">()</span>
+            
+            <span class="c"># Return render_to_response with the context data.</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            
+        <span class="c"># Otherwise, if the response is a redirect ...</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;redirect&#39;</span><span class="p">:</span>
+            
+            <span class="c">#... execute the redirect.</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            
+</div></div>
+<div class="viewcode-block" id="ListView"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.ListView">[docs]</a><span class="k">class</span> <span class="nc">ListView</span><span class="p">(</span><span class="n">BasePaginatedMongoMixin</span><span class="p">,</span> <span class="n">View</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides a generic list view for MongoDB.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Set the class type.</span>
+    <span class="n">class_type</span>          <span class="o">=</span> <span class="s">&#39;list&#39;</span>
+    
+<div class="viewcode-block" id="ListView.get_list"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.ListView.get_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provides a list of JSON objects from a MongoConnection class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># Set up the mongo connection.</span>
+        <span class="n">mongo_object</span>    <span class="o">=</span> <span class="n">MongoConnection</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auth_string</span><span class="p">)</span>
+        <span class="n">connection</span>      <span class="o">=</span> <span class="n">mongo_object</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        
+        <span class="c"># Get the total count and the number of pages.</span>
+        <span class="n">total_count</span>     <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_dict</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">total_count</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pages</span>      <span class="o">=</span> <span class="p">(</span><span class="n">total_count</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pages</span>      <span class="o">=</span> <span class="p">(</span><span class="n">total_count</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">query_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_filter</span><span class="p">[</span><span class="s">&#39;kwargs&#39;</span><span class="p">]</span>
+            <span class="n">query_filter</span> <span class="o">=</span> <span class="p">{</span> <span class="n">query_kwargs</span><span class="p">[</span><span class="s">&#39;mongo_field&#39;</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="n">query_kwargs</span><span class="p">[</span><span class="s">&#39;url_kwarg&#39;</span><span class="p">]]</span> <span class="p">}</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span>
+            <span class="n">query_filter</span> <span class="o">=</span> <span class="bp">None</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># Try to get the page from the URL.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="p">[</span><span class="s">&#39;page&#39;</span><span class="p">])</span>
+            
+            <span class="c"># If we can get the page from the URL, calculate the offset.</span>
+            
+            <span class="c"># First, test if the current page is 0.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                
+                <span class="c"># If so, short circuit the process and return a redirect URL while setting the type as a redirect.</span>
+                <span class="n">redirect_url</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">?page=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="s">&#39;PATH_INFO&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect_url</span><span class="p">,</span> <span class="s">&#39;redirect&#39;</span>
+            
+            <span class="c"># Next, check if the current page is less than the total number of pages.</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                
+                <span class="c"># If so, set the offset to the 1-indexed page number * the pagination limit.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span>
+                
+                <span class="c"># Set the previous/next page numbers.</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                    
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">next_page_number</span> <span class="o">=</span> <span class="mi">2</span>
+                
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">previous_page_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">-</span> <span class="mi">1</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">next_page_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">previous_page_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">-</span> <span class="mi">1</span>
+                
+            <span class="c"># Finally, check if the current page is greater than the total number of pages.</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                
+                <span class="c"># If so, short circuit the process and return a redirect URL while setting the type as a redirect.</span>
+                <span class="n">redirect_url</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">?page=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="s">&#39;PATH_INFO&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">redirect_url</span><span class="p">,</span> <span class="s">&#39;redirect&#39;</span>
+                
+            <span class="c"># Check if the sort is absent.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_sort</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                
+                <span class="c"># If there&#39;s no sort, just send along the connection query.</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">query_filter</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+            
+            <span class="c"># Otherwise, if the sort is present ...</span>
+            <span class="k">else</span><span class="p">:</span>
+                
+                <span class="c"># ... send along the connection query with the sort attached.</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">query_filter</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_sort</span><span class="p">[</span><span class="s">&#39;field&#39;</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query_sort</span><span class="p">[</span><span class="s">&#39;direction&#39;</span><span class="p">])</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            
+            <span class="c"># If there&#39;s no page in the URL, set the page to 1.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+            
+            <span class="c"># If so, set the offset to the 1-indexed page number * the pagination limit.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span>
+            
+            <span class="c"># Set the previous/next page numbers.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                <span class="k">pass</span>
+                
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">next_page_number</span> <span class="o">=</span> <span class="mi">2</span>
+            
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">previous_page_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">-</span> <span class="mi">1</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">next_page_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">previous_page_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">-</span> <span class="mi">1</span>
+            
+            <span class="c"># Check if the sort is absent.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_sort</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                
+                <span class="c"># If there&#39;s no sort, just send along the connection query.</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">query_filter</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+                
+            <span class="c"># Otherwise, if the sort is present ...</span>
+            <span class="k">else</span><span class="p">:</span>
+                
+                <span class="c"># ... send along the connection query with the sort attached.</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">query_filter</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pagination_limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_sort</span><span class="p">[</span><span class="s">&#39;field&#39;</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query_sort</span><span class="p">[</span><span class="s">&#39;direction&#39;</span><span class="p">])</span>     
+        
+        <span class="c"># Set up a query list.</span>
+        <span class="n">query_list</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c"># Append each item to the query_list.</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">query</span><span class="p">:</span>
+            <span class="n">item_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">item_as_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">item_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">item_as_kwargs</span><span class="p">)</span>
+            <span class="n">item_dict</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s">&#39;_id&#39;</span><span class="p">])</span>
+            <span class="n">item_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;_id&#39;</span><span class="p">)</span>
+            <span class="n">query_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_dict</span><span class="p">)</span>
+        
+        <span class="c"># Return the query list, and set the type of return to query.</span>
+        <span class="k">return</span> <span class="n">query_list</span><span class="p">,</span> <span class="s">&#39;query&#39;</span>
+        </div>
+<div class="viewcode-block" id="ListView.get"><a class="viewcode-back" href="../../mongolier.html#mongolier.views.ListView.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overrides the built in get() function on the base View class.</span>
+<span class="sd">        Gets the object and the context.</span>
+<span class="sd">        Returns a redirect if there&#39;s an issue with the page number.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># If the type of response is a query:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_list</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;query&#39;</span><span class="p">:</span>
+            
+            <span class="c"># Set the results to the first part of the tuple.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_list</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            
+            <span class="c"># If there are no results ...</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query_results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                
+                <span class="c">#... raise a 404.</span>
+                <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s">u&quot;List is empty.&quot;</span><span class="p">)</span>
+                
+            <span class="c"># If there are results, set the context data.</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            
+            <span class="c"># Return render_to_response with the context data.</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_to_response</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            
+        <span class="c"># Otherwise, if the response is a redirect ...</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_list</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;redirect&#39;</span><span class="p">:</span>
+            
+            <span class="c">#... execute the redirect.</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_list</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">mongolier alpha documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright Jason Bartz and Jeremy Bowers.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
