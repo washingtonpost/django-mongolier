@@ -8,6 +8,7 @@ setup(name='django-mongolier',
         author_email=['bartzj@washpost.com','bowersj@washpost.com'],
         url='https://github.com/wpmedia/django-mongolier',
         packages = ['mongolier',],
+        requires = ['pymongo>=2.1']
         license = 'MIT',
         classifiers=[
             'Environment :: Web Environment',
