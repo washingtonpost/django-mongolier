@@ -9,12 +9,17 @@ But I needed to have this without installing any extra stuff.
 Please enjoy version 0.0.3 of my class-based list/detail views for PyMongo.
     -Jeremy
 """
-from bson.objectid import ObjectId
-from common.mongo import MongoConnection
-from django.conf import settings
+try:
+    from django.db.settings import DEFAULT_PAGINATION
+except ImportError:
+    DEFAULT_PAGINATION = 25
+
 from django.views.generic.base import View
 from django.http import Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
+
+from bson.objectid import ObjectId
+from mongolier import MongoConnection
 
 class BaseMongoMixin(object):
     db_name                     = None
@@ -52,7 +57,7 @@ class BasePaginatedMongoMixin(BaseMongoMixin):
     next_page_number            = None
     previous_page_number        = None
     offset                      = None
-    pagination_limit            = settings.DEFAULT_PAGINATION
+    pagination_limit            = DEFAULT_PAGINATION
     page_range                  = None
     
     def get_context_data(self, *args, **kwargs):

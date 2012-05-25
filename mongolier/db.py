@@ -1,6 +1,5 @@
 '''
-A base class for connecting to the Post Mongo DB
-    hosted on ec2 @ data.washingtonpost.com
+A base class for connecting to the MongoDB
 
 Usage:
 
@@ -13,7 +12,7 @@ import time
 from pymongo import Connection
 from pymongo.errors import AutoReconnect, ConnectionFailure, OperationFailure
 from gridfs import GridFS
-from common.mongo.exceptions import IncorrectParameters
+from mongolier.exceptions import IncorrectParameters
 
 class MongoConnection(object):
     
