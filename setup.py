@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
 
 setup(name='django-mongolier',
         version='0.0.3',
@@ -7,8 +11,8 @@ setup(name='django-mongolier',
         author='Jason Bartz & Jeremy Bowers',
         author_email=['bartzj@washpost.com','bowersj@washpost.com'],
         url='https://github.com/wpmedia/django-mongolier',
-        packages = ['mongolier',],
-        requires = ['pymongo>=2.1']
+        packages = ['mongolier','mongolier.utils'],
+        install_requires = ['pymongo',],
         license = 'MIT',
         classifiers=[
             'Environment :: Web Environment',
