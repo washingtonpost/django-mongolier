@@ -2,7 +2,7 @@
 
 ## MongoConnection
 
-`db.py` includes a MongoConnection class. MongoConnection is a base class for connecting to the WaPo MongoDB server hosted on Amazon EC2 at http://data.washingtonpost.com/
+`db.py` includes a MongoConnection class. MongoConnection is a base class for connecting to a MongoDB server.
 
 ###Usage
     
@@ -36,8 +36,6 @@ The keyword argument `kwargs` should have a value with another dict. This dict s
 *   `mongo_field` -- The field name for PyMongo to filter on.
 *   `url_kwarg` -- The URL kwarg from `urls.py` for PyMongo to match on.
 
-Please see https://github.com/WPMedia/wapo-sports-pkg/blob/master/wapo\_sports\_proj/apps/log/views.py for examples.
-
 ####Using `query_sort`
 
 `query_sort` is a dict containing information for how the class-based views should sort a MongoDB query.
@@ -46,8 +44,6 @@ The `query_sort` dict should have two keyword arguments:
 
 *   `field` -- The name of the field for PyMongo to sort on.
 *   `direction` -- The direction for PyMongo to sort in.
-
-Please see https://github.com/WPMedia/wapo-sports-pkg/blob/master/wapo\_sports\_proj/apps/log/views.py for examples.
 
 ###DetailView
 
