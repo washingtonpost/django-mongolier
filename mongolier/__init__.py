@@ -4,4 +4,4 @@ __author__ = 'Jason Bartz & Jeremy Bowers'
 __license__ = 'MIT'
 
 from mongolier.db import MongoConnection
-from mongolier.utils import ConvertDecimal
+from mongolier.utils.convert import ConvertDecimal
