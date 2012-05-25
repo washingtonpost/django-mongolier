@@ -123,10 +123,33 @@ class ConvertDecimal(BaseConvert):
         self.to_float = to_float
 
     def decode_dec(self, decimal_obj):
-        
+        """
+        Converts a Decimal object to a 
+
+        """
         if self.to_float:
             return(float(decimal_obj))
         else:
-            return(str(decimal_obj))            
+            return(str(decimal_obj))
 
+class Deserializer(BaseConvert):
+    """
+    A helper class that deserializes json so that it can properly loaded into Mongo.
 
+    Main features
+
+    * converts unicode to string
+
+    """
+
+    def __init__(self, **kwargs):
+
+        self.other_input = {
+            unicode: self.to_string
+        }
+
+    def to_string(self, unicode_obj):
+        """
+        Converts a unicode obj to a string
+        """
+        return(str(unicode_obj))
