@@ -69,6 +69,8 @@ class LoadFixture(FixtureBase):
         for key, document in fixture_dict.items():
             if 'objectid_' in key and self.respect_objectid:
                 document['_id'] = ObjectId(key.split('objectid_')[1])
-                 
-            document['_id'] = key
+            
+            elif self.respect_objectid:
+                document['_id'] = key
+            
             self.connection.insert(document)
