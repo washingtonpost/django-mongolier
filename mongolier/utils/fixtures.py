@@ -6,8 +6,9 @@ exporting fixtures from MongoDB
 
 """
 import sys
+import json
 
-from bson import json_utils
+from bson import json_util
 from bson.objectid import ObjectId
 
 class FixtureBase(object):
@@ -20,9 +21,7 @@ class FixtureBase(object):
     def __init__(self, connection, respect_objectid=False):
         
         self.connection = connection
-
-        if respect_objectid:
-            self.respect_objectid = True
+        self.respect_objectid = respect_objectid
 
 class CreateFixture(FixtureBase):
     """
@@ -42,19 +41,18 @@ class CreateFixture(FixtureBase):
 
         fixture_dict = {}
 
-        for document in connection.find():
+        for document in self.connection.find():
             
-            if isinstance(key, ObjectId) and self.respect_objectid:
-                key = 'objectid_%s' % document['_id']
+            if isinstance(document['_id'], ObjectId) and self.respect_objectid:
+                key = 'objectid_%s' % document['_id'].__str__()
             else:
-                key = document['_id']                
-
+                key = document['_id'].__str__()
             document.pop('_id')
 
             fixture_dict[key] = document
 
         
-        sys.stdout.write(json.dumps(fixture_dict, default=json_utils.default))
+        sys.stdout.write(json.dumps(fixture_dict, default=json_util.default, indent=2))
         
 
 class LoadFixture(FixtureBase):
@@ -66,11 +64,11 @@ class LoadFixture(FixtureBase):
     def load(self, fixture):
        
         with open(fixture, 'rb') as fixtures_file_obj:
-            fixture_dict = json.load(fixtures_file_obj, object_hook=json_utils.object_hook)
+            fixture_dict = json.load(fixtures_file_obj, object_hook=json_util.object_hook)
 
         for key, document in fixture_dict.items():
             if 'objectid_' in key and self.respect_objectid:
                 document['_id'] = ObjectId(key.split('objectid_')[1])
                  
             document['_id'] = key
-            connection.insert(document)
+            self.connection.insert(document)

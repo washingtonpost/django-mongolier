@@ -10,6 +10,7 @@ from mongolier.utils.fixtures import LoadFixture
 from mongolier.management.basecommand import MongolierCommand
 
 class Command(MongolierCommand):
+    option_list = MongolierCommand.option_list
     
     def handle(self, *args, **options):
 
