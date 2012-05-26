@@ -14,7 +14,7 @@ class Command(MongolierCommand):
     
     def handle(self, *args, **options):
 
-        mongo = self.auth()
+        mongo = self.auth(**options)
 
         fixture_creator = LoadFixture(mongo)
 
