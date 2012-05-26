@@ -38,7 +38,9 @@ class CreateFixture(FixtureBase):
     """
 
     def create(self):
-
+        """
+        Create a fixture file
+        """
         fixture_dict = {}
 
         for document in self.connection.find():
@@ -62,7 +64,9 @@ class LoadFixture(FixtureBase):
     """
 
     def load(self, fixture):
-       
+       """
+       Load a fixture into MongoDB
+       """
         with open(fixture, 'rb') as fixtures_file_obj:
             fixture_dict = json.load(fixtures_file_obj, object_hook=json_util.object_hook)
 

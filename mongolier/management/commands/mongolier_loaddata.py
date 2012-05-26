@@ -11,7 +11,8 @@ from mongolier.management.basecommand import MongolierCommand
 
 class Command(MongolierCommand):
     option_list = MongolierCommand.option_list
-    
+    help = "Load a json fixture into Mongo"
+    args = "d <database> c <collection> a <auth> fixture_location"
     def handle(self, *args, **options):
 
         mongo = self.auth(**options)

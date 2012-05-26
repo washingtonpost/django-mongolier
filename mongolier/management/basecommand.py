@@ -28,7 +28,9 @@ class MongolierCommand(BaseCommand):
         help='MongoDB database name')
     )
     def auth(self, **options):
-
+        """
+        Authorize with a database/collection
+        """
         connection_object = MongoConnection(db=options['database'],
                                     collection=options['collection'],
                                     auth=options['auth'])

@@ -12,6 +12,8 @@ from mongolier.management.basecommand import MongolierCommand
 
 class Command(MongolierCommand):
     option_list = MongolierCommand.option_list
+    help = "Dump a fixture out of MongoDB into a json file."
+    args = "d <database> c <collection> a <auth>"
     def handle(self, *args, **options):
 
         mongo = self.auth(**options)
