@@ -1,5 +1,5 @@
 __title__ = 'mongolier'
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __author__ = 'Jason Bartz & Jeremy Bowers'
 __license__ = 'MIT'
 

@@ -6,7 +6,7 @@ except ImportError:
 
 
 setup(name='django-mongolier',
-        version='0.0.3',
+        version='0.0.4',
         description='A lightweight wrapper for using django with MongoDB (pymongo)',
         author='Jason Bartz & Jeremy Bowers',
         author_email=['bartzj@washpost.com','bowersj@washpost.com'],

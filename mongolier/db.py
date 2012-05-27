@@ -83,6 +83,7 @@ class MongoConnection(object):
                     raise IncorrectParameters('Incorrect auth params, you passed %s' % self.auth)
                 
                 database.authenticate(self.auth[0], self.auth[1])
+        
         except AutoReconnect, error_message:
             time.sleep(2)
             if self._retries <= self.max_retries:
@@ -90,6 +91,7 @@ class MongoConnection(object):
             else:
                 raise ConnectionFailure('Max number of retries (%s) reached. Error: %s'\
                                          % (self.max_retries, error_message))
+        
         except OperationFailure, error_message:
             time.sleep(2)
             if self._retries <= self.max_retries:
@@ -97,6 +99,7 @@ class MongoConnection(object):
             else:
                 raise OperationFailure('Max number of retries (%s) reached. Error: %s'\
                                          % (self.max_retries, error_message))
+        
         return database
         
     def connect(self):
