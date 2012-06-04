@@ -4,6 +4,8 @@ convert.py
 Contains utilities and tools for pymongo
 """
 from decimal import Decimal, getcontext
+import datetime
+
 from mongolier.exceptions import ValueNotSupported
 
 
@@ -132,20 +134,26 @@ class ConvertDecimal(BaseConvert):
         else:
             return(str(decimal_obj))
 
-class Deserializer(BaseConvert):
+class Deserializer(ConvertDecimal):
     """
     A helper class that deserializes json so that it can properly loaded into Mongo.
 
+    Emulate's the `default` and `json_util` callback functions from `bson`
+
     Main features
 
-    * converts unicode to string
-
+    * converts unicode to `str`
+    * converts Decimal objects to `str` or `float`
+    * converts datetime to `str`
+    
     """
 
     def __init__(self, **kwargs):
 
         self.other_input = {
-            unicode: self.to_string
+            unicode: self.to_string,
+            Decimal: self.decode_dec,
+            datetime.datetime: self.decode_date,
         }
 
     def to_string(self, unicode_obj):
@@ -153,3 +161,6 @@ class Deserializer(BaseConvert):
         Converts a unicode obj to a string
         """
         return(str(unicode_obj))
+
+    def decode_date(self, date_obj):
+        return(datetime.datetime.strftime(date_obj, '%Y-%m-%d %H:%S'))
