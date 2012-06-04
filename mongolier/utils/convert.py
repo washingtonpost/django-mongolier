@@ -155,7 +155,7 @@ class Deserializer(ConvertDecimal):
         self.other_input = {
             unicode: self.to_string,
             Decimal: self.decode_dec,
-            datetime.datetime: self.decode_date,
+            datetime.date: self.decode_date,
         }
 
 
@@ -166,4 +166,4 @@ class Deserializer(ConvertDecimal):
         return(str(unicode_obj))
 
     def decode_date(self, date_obj):
-        return(datetime.datetime.strftime(date_obj, '%Y-%m-%d %H:%S'))
+        return(datetime.datetime.strftime(date_obj, '%Y-%m-%d'))
