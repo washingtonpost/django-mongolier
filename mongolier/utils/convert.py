@@ -149,12 +149,15 @@ class Deserializer(ConvertDecimal):
     """
 
     def __init__(self, **kwargs):
+        
+        super(Deserializer, self).__init__(**kwargs)
 
         self.other_input = {
             unicode: self.to_string,
             Decimal: self.decode_dec,
             datetime.datetime: self.decode_date,
         }
+
 
     def to_string(self, unicode_obj):
         """
