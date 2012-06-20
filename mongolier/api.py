@@ -7,6 +7,8 @@ A lightweight implementation of pymongo and django-tastypie
 from tastypie.resources import Resource
 from bson.objectid import ObjectId
 
+from mongolier.exceptions import DoesNotExist
+
 class MongoResource(Resource):
     """
     A class that can be subclassed in order to plug a mongo document
@@ -57,45 +59,50 @@ class MongoResource(Resource):
         """
         return(self._meta.connection.find_one(ObjectId(kwargs['pk'])))
     
-    ## TODO:
-    # def obj_create(self, request=None, **kwargs):
-    #     """
-    #     A method to create an object
-    #     """
-    #     connection = self._connect()
+    def obj_create(self, request=None, **kwargs):
+        """
+        A method to create an object
+        """
+        bundle.obj = self._meta.connection.save(kwargs)
 
-    #     bundle.obj = connection.save(kwargs)
+        bundle = self.full_hydrate(bundle)
 
-    #     bundle = self.full_hydrate(bundle)
+        return(bundle)
 
-    #     return(bundle)
+    def obj_update(self, request=None, **kwargs):
+        """
+        A method to update an object
+        """
+        return(self.obj_create(bundle, request, **kwargs))
 
-    # def obj_update(self, request=None, **kwargs):
-    #     """
-    #     A method to update an object
-    #     """
-    #     return(self.obj_create(bundle, request, **kwargs))
+    def obj_delete(self, request=None, **kwargs):
+        """
+        A method to delete a single object.
+        """
 
-    # def obj_delete(self, request=None, **kwargs):
-    #     """
-    #     A method to delete a single object.
-    #     """
-    #     connection = self._connect()
+        # First, find the object to make sure it exists
+        object_to_be_deleted = self._meta.connection.find_one(**kwargs)
 
-    #     failure = connection.remove(**kwargs)
+        # If it exists, delete it.
+        if object_to_be_deleted:
+            self._meta.connection.remove(**kwargs)
 
-    # def obj_delete_list(self, request=None, **kwargs):
-    #     """
-    #     A method to delete an entire list of objects
+        # Otherwise, raise exception
+        else:
+            raise DoesNotExist("Item with parameters %s does not exist" % kwargs)
 
-    #     UNUSED: Required to override.
-    #     """
-    #     pass
+    def obj_delete_list(self, request=None, **kwargs):
+        """
+        A method to delete an entire list of objects
 
-    # def rollback(self, bundles):
-    #     """
-    #     A method to rollback failed database transactions.
+        Does not check to see if the objects exist.  
+        Will not raise exception out if no objects are deleted.
+        """
+        self._meta.connection.remove(**kwargs)
 
-    #     UNUSED: Required to override.
-    #     """
-    #     pass
+    def rollback(self, bundles):
+        """
+        Unused. A method to rollback failed database transactions.
+
+        """
+        raise NotImplementedError("Not used for Mongodb")

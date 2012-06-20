@@ -5,5 +5,10 @@ class IncorrectParameters(Exception):
 
 class ValueNotSupported(Exception):
     """
-    Not a supported Value
+    Not a supported Value.
     """
+
+class DoesNotExist(Exception):
+	"""
+	Object or Value does not exist.
+	"""
