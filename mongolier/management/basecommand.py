@@ -25,6 +25,7 @@ class MongolierCommand(BaseCommand):
     make_option('-o','--respect_objectid',
         dest='respect_objectid',
         default=False,
+        action='store_true',
         help='MongoDB database name')
     )
     def auth(self, **options):

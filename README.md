@@ -15,14 +15,14 @@ query syntax of `pymongo` in.
 
 * db.py - a connection object for connecting to mongo instances and executing queries
 * views.py - a lightweight replication of Django's class-based views for MongoDB
-* api.py - a lightweight implementation of django-tastypie and mongodb (django-tastypie required) [readonly at the moment]
+* api.py - a lightweight implementation of django-tastypie and mongodb (django-tastypie required)
 * utils.ConvertDecimal - a class for converting decimal objects into strings or floats so they can be inserted into mongo
+* fixture creation and database 'syncing'
 
 ## RoadMap
 
-* fully editable api (POST, PATCH, DELETE)
 * better error handling
-* fixture creation and database 'syncing'
+* better/persistent connection objects
 
 ## Getting started
 
@@ -46,6 +46,25 @@ my_mongo_cursor = mongo.find( {'query_key': query_value} )
 
 ```
 
+### Management Commands (fixtures)
+
+Available options
+
+* '-d', '--database' -- MongoDB database name
+* '-c', '--collection' -- MongoDB collection name
+* '-a', '--auth' -- MongoDB auth (user:password)
+* '-o', '--respect_objectid' -- Will retain original ObjectId (default: False)
+
+#### Dump fixtures
+
+	django-admin.py mongolier_dumpdata --database face --collection palm --auth 'username:pass' > /path/to/my/file.json
+
+#### Load fixtures
+
+	django-admin.py mongolier_loaddata --database face --collection palm --auth 'username:pass' /path/to/my/file.json
+
+
+
 ## Views
 
 Check out `docs.detailed_readme.md`
@@ -54,10 +73,6 @@ Check out `docs.detailed_readme.md`
 
 `coming soon`
 
-## Utils
-
-`coming soon`
-
-### ConvertDecimal
+## Utilities
 
 `coming soon`
