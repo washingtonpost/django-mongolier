@@ -6,12 +6,15 @@
 Welcome to mongolier's documentation!
 =====================================
 
-Contents:
-
 .. toctree::
    :maxdepth: 4
 
-   mongolier
+   Getting Started
+   Using Views
+   Tastypie API
+   Utilities
+   Mongolier API Documentation
+
 
 
 Indices and tables
