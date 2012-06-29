@@ -26,6 +26,10 @@ class MongolierCommand(BaseCommand):
         dest='respect_objectid',
         default=False,
         help='MongoDB database name')
+    make_option('-g','--gridfs',
+        dest='gridfs',
+        default=False,
+        help='Use GridFS instead of a standard connection')
     )
     def auth(self, **options):
         """
@@ -35,4 +39,7 @@ class MongolierCommand(BaseCommand):
                                     collection=options['collection'],
                                     auth=options['auth'])
 
-        return(connection_object.connect())
+        if options['gridfs']:
+            return(connection_object.gridfs())
+        else:
+            return(connection_object.connect())
