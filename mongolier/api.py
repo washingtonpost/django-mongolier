@@ -47,6 +47,31 @@ class MongoResource(Resource):
     class Meta:
         connection = None
 
+    def apply_filters(self, request, applicable_filters):
+
+        mongo_list_cursor = self._meta.connection.find(applicable_filters)
+
+        results = []
+
+        for mongo_obj in mongo_list_cursor:
+            results.append(mongo_obj)
+
+        return(results)
+
+    def build_filters(self, filters=None):
+        """
+        Deconstructs a GET request to create filter params
+        """
+        qs_filters = {}
+
+        filters.pop('format')
+
+        for key, items in filters.items():
+            if len(items) == 1:
+                qs_filters[key] = items[0]
+
+        return(qs_filters)
+
     def get_resource_uri(self, bundle_or_obj):
         """
         A method that returns the URI for an indvidual object. Uses the
@@ -79,7 +104,18 @@ class MongoResource(Resource):
         """
         A method to to enable filtering on a list
         """
-        return(self.get_object_list(request))
+        filters = {}
+
+        if hasattr(request, 'GET'):
+            # Grab a mutable copy.
+            filters = request.GET.copy()
+
+        # Update with the provided kwargs.
+        filters.update(kwargs)
+
+        applicable_filters = self.build_filters(filters=filters)
+
+        self.apply_filters(applicable_filters)
 
     def obj_get(self, request=None, **kwargs):
         """
