@@ -50,7 +50,6 @@ class MongoResource(Resource):
     def apply_filters(self, request, applicable_filters):
 
         mongo_list_cursor = self._meta.connection.find(applicable_filters)
-
         results = []
 
         for mongo_obj in mongo_list_cursor:
@@ -67,8 +66,7 @@ class MongoResource(Resource):
         filters.pop('format')
 
         for key, items in filters.items():
-            if len(items) == 1:
-                qs_filters[key] = items[0]
+            qs_filters[key] = items
 
         return(qs_filters)
 
