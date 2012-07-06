@@ -115,7 +115,7 @@ class MongoResource(Resource):
 
         applicable_filters = self.build_filters(filters=filters)
 
-        self.apply_filters(applicable_filters)
+        self.apply_filters(request, applicable_filters)
 
     def obj_get(self, request=None, **kwargs):
         """
