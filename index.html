@@ -280,25 +280,26 @@ conversion functionality.</p>
 <li>Add an object to compare against and a method to <tt class="docutils literal"><span class="pre">__init__</span></tt></li>
 <li>Add that method and do your conversion</li>
 </ul>
-<div class="highlight-python"><pre>```my_new_converter.py```
+<div class="highlight-python"><div class="highlight"><pre><span class="sb">```converter.py```</span>
 
-from mongolier.utils import BaseConvert
-
-
-class DateConverter(BaseConvert):
+<span class="kn">from</span> <span class="nn">mongolier.utils</span> <span class="kn">import</span> <span class="n">BaseConvert</span>
 
 
-def __init__(self, **kwargs):
+<span class="k">class</span> <span class="nc">DateConverter</span><span class="p">(</span><span class="n">BaseConvert</span><span class="p">):</span>
 
-    super(Deserializer, self).__init__(**kwargs)
 
-    self.other_input = {
-        datetime.datetime: self.to_date,
-    }
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
-def to_date(self, datetime_obj):
+        <span class="nb">super</span><span class="p">(</span><span class="n">Deserializer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    return(datetime.datetime.strftime(date_obj, '%Y-%m-%d'))</pre>
+        <span class="bp">self</span><span class="o">.</span><span class="n">other_input</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_date</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">to_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datetime_obj</span><span class="p">):</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">date_obj</span><span class="p">,</span> <span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">))</span>
+</pre></div>
 </div>
 </div>
 </div>
@@ -485,7 +486,7 @@ that output.</p>
 
 <dl class="attribute">
 <dt id="mongolier.api.MongoResource.base_fields">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">base_fields</tt><em class="property"> = {'resource_uri': &lt;tastypie.fields.CharField object at 0x10d7a1590&gt;}</em><a class="headerlink" href="#mongolier.api.MongoResource.base_fields" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">MongoResource.</tt><tt class="descname">base_fields</tt><em class="property"> = {'resource_uri': &lt;tastypie.fields.CharField object at 0x109f86510&gt;}</em><a class="headerlink" href="#mongolier.api.MongoResource.base_fields" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
