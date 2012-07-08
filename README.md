@@ -6,9 +6,9 @@ A lightweight toolkit for integrating MongoDB with Django
 
 django-mongolier is a wrapper for `pymongo` that adds many of the happy django bits for using mongodb in a normal django app.
 
-You don't need any sort of special django-nosql or anything else, all you need is django >=1.31 and pymongo (and django-tastypie for the apis)
+You don't need any sort of special django-nosql or anything else, all you need is django >=1.31 and pymongo (and django-tastypie for the apis).
 
-The goal of this was to only abstract out the annoying bits (AutoReconnect exceptions, mainly) while leaving the fairly intuitive
+The goal of this was to only abstract out the annoying bits (AutoReconnect exceptions, mainly) while leaving the standard
 query syntax of `pymongo` in.
 
 ## What's included
@@ -22,7 +22,6 @@ query syntax of `pymongo` in.
 ## RoadMap
 
 * better error handling
-* better/persistent connection objects
 
 ## Getting started
 
@@ -30,9 +29,9 @@ query syntax of `pymongo` in.
 
 ```python
 
-from mongolier import MongoConnection
-my_connection_object = MongoConnection(database='face', collection='palm', auth='username:pass')
-mongo = my_connection_object.connect()
+from mongolier import PersistentConnection
+my_connection_object = PersistentConnection(database='face', collection='palm', auth='my_user:awesome_password')
+my_connection_object.api.find({'query_param': 'query_value'})
 
 ```
 
@@ -46,33 +45,4 @@ my_mongo_cursor = mongo.find( {'query_key': query_value} )
 
 ```
 
-### Management Commands (fixtures)
-
-Available options
-
-* '-d', '--database' -- MongoDB database name
-* '-c', '--collection' -- MongoDB collection name
-* '-a', '--auth' -- MongoDB auth (user:password)
-* '-o', '--respect_objectid' -- Will retain original ObjectId (default: False)
-
-#### Dump fixtures
-
-	django-admin.py mongolier_dumpdata --database face --collection palm --auth 'username:pass' > /path/to/my/file.json
-
-#### Load fixtures
-
-	django-admin.py mongolier_loaddata --database face --collection palm --auth 'username:pass' /path/to/my/file.json
-
-
-
-## Views
-
-Check out `docs.detailed_readme.md`
-
-## API
-
-`coming soon`
-
-## Utilities
-
-`coming soon`
+Check out the [API docs](http://wpmedia.github.com/django-mongolier "API documentation") for a more detailed README

@@ -9,6 +9,6 @@ class ValueNotSupported(Exception):
     """
 
 class DoesNotExist(Exception):
-	"""
-	Object or Value does not exist.
-	"""
+    """
+    Object or Value does not exist.
+    """

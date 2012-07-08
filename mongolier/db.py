@@ -1,4 +1,4 @@
-'''
+"""
 A base class for connecting to the MongoDB
 
 Usage:
@@ -7,17 +7,17 @@ mongo_object = connect.MongoConnection(port=222, host='myhost')
 
 mongo_connection = mongo_object.connect()
 
-'''
+"""
 import time
 import pymongo
 from pymongo.errors import AutoReconnect, ConnectionFailure, OperationFailure
 from gridfs import GridFS
 from mongolier.exceptions import IncorrectParameters
 
-class MongoConnection(object):
+class BaseConnection(object):
 
     def __init__(self, *args, **kwargs):
-        '''
+        """
         Instantiate the Mongo class
 
         This can take up to four optional arguments, all of which help
@@ -37,7 +37,7 @@ class MongoConnection(object):
 
         :: collection
         Collection, where the actual data is stored
-        '''
+        """
         self.args = args
 
         for key, value in kwargs.items():
@@ -64,12 +64,12 @@ class MongoConnection(object):
         self._retries = 0
 
     def _connect_to_db(self):
-        '''
+        """
         Connect to the database, but do not initialize a connection.
 
         Depending on which public method is used, it initiates either a standard
             mongo connection or a gridfs connection
-        '''
+        """
 
         try:
             connection = pymongo.Connection(self.host, self.port)
@@ -102,9 +102,9 @@ class MongoConnection(object):
         return database
 
     def connect(self):
-        '''
+        """
         Connect to the mongo instance
-        '''
+        """
         database = self._connect_to_db()
 
         collection = database[self.collection]
@@ -112,9 +112,9 @@ class MongoConnection(object):
         return collection
 
     def gridfs(self):
-        '''
+        """
         A module to connect to GridFS and chunk large files for saving into mongo
-        '''
+        """
         database = self._connect_to_db()
 
         grid = GridFS(database, collection=self.collection)
@@ -122,13 +122,17 @@ class MongoConnection(object):
         return grid
 
 
-class Connection(MongoConnection):
+class MongoConnection(BaseConnection):
     """
-    Alias for MongoConnection.
+    Alias for BaseConnection so we don't break backwards compatibility.
     """
 
+class Connection(BaseConnection):
+    """
+    Alias for BaseConnection so we don't break backwards compatibility.
+    """
 
-class PersistentConnection(MongoConnection):
+class PersistentConnection(BaseConnection):
     """
     A wrapper for MongoConnection that stores a persistent set of connection information
 
@@ -142,16 +146,16 @@ class PersistentConnection(MongoConnection):
         "retries": 5,
     })
 
-    You can pass an additional Boolean value, called gridfs, if you need a gridfs connection instead
-    of the standard MongoConnection.
 
     Inside your module, just pull in that connection and query against its api.
 
-        '''mymodule.py'''
+    >>> from django.db.settings import my_connection
 
-        from django.db.settings import my_connection
+    >>> my_connection.api.find_one({"query_param": "value"})
 
-        my_connection.api.find_one( { "query_param": "value" } )
+    For GridFS, use the gridfs API.
+
+    >>> my_connection.gridfs.get_last_version(**{"query_param": "value"})
     """
 
     def __init__(self, *args, **kwargs):

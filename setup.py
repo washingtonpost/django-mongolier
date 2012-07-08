@@ -4,16 +4,17 @@ try:
 except ImportError:
     from distutils.core import setup
 
+import mongolier
 
 setup(name='django-mongolier',
-        version='0.0.4',
+        version=mongolier.__version__,
         description='A lightweight wrapper for using django with MongoDB (pymongo)',
-        author='Jason Bartz & Jeremy Bowers',
+        author=mongolier.__author__,
         author_email=['bartzj@washpost.com','bowersj@washpost.com'],
         url='https://github.com/wpmedia/django-mongolier',
         packages = ['mongolier','mongolier.utils'],
         install_requires = ['pymongo',],
-        license = 'MIT',
+        license = mongolier.__license__,
         classifiers=[
             'Environment :: Web Environment',
             'Framework :: Django',
