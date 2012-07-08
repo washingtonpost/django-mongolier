@@ -23,7 +23,7 @@ class MongolierCommand(BaseCommand):
         default=None,
         help='MongoDB auth'),
     make_option('-o','--respect_id',
-        dest='respect_objectid',
+        dest='respect_id',
         default=False,
         action='store_true',
         help='When exporting, leave the ``_id`` of the original object.')
