@@ -22,11 +22,11 @@ class MongolierCommand(BaseCommand):
         dest='auth',
         default=None,
         help='MongoDB auth'),
-    make_option('-o','--respect_objectid',
+    make_option('-o','--respect_id',
         dest='respect_objectid',
         default=False,
         action='store_true',
-        help='MongoDB database name')
+        help='When exporting, leave the ``_id`` of the original object.')
     make_option('-g','--gridfs',
         dest='gridfs',
         default=False,
