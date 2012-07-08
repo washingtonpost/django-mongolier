@@ -125,7 +125,7 @@ For example, to convert all datetimes to date strings:
 
 ::
 
-    ```my_new_converter.py```
+    ```converter.py```
 
     from mongolier.utils import BaseConvert
 
@@ -133,15 +133,17 @@ For example, to convert all datetimes to date strings:
     class DateConverter(BaseConvert):
 
 
-    def __init__(self, **kwargs):
+        def __init__(self, **kwargs):
 
-        super(Deserializer, self).__init__(**kwargs)
+            super(Deserializer, self).__init__(**kwargs)
 
-        self.other_input = {
-            datetime.datetime: self.to_date,
-        }
+            self.other_input = {
+                datetime.datetime: self.to_date,
+            }
 
-    def to_date(self, datetime_obj):
+        def to_date(self, datetime_obj):
 
-        return(datetime.datetime.strftime(date_obj, '%Y-%m-%d'))
+            return(datetime.datetime.strftime(date_obj, '%Y-%m-%d'))
+
+
 
