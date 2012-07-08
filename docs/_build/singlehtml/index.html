@@ -44,23 +44,29 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-mongolier-s-documentation">
-<h1>Welcome to mongolier&#8217;s documentation!<a class="headerlink" href="#welcome-to-mongolier-s-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="django-mongolier">
+<h1>django-mongolier<a class="headerlink" href="#django-mongolier" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <span id="document-Getting Started"></span><div class="section" id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="make-a-connection">
 <h3>Make a connection<a class="headerlink" href="#make-a-connection" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mongolier</span> <span class="kn">import</span> <span class="n">MongoConnection</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mongolier</span> <span class="kn">import</span> <span class="n">PersistentConnection</span>
 <span class="n">my_connection_object</span> <span class="o">=</span> <span class="n">MongoConnection</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s">&#39;face&#39;</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="s">&#39;palm&#39;</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="s">&#39;username:pass&#39;</span><span class="p">)</span>
-<span class="n">mongo</span> <span class="o">=</span> <span class="n">my_connection_object</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="query">
 <h3>Query<a class="headerlink" href="#query" title="Permalink to this headline">¶</a></h3>
 <p>Query like you would any other <cite>pymongo</cite> query</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">my_mongo_cursor</span> <span class="o">=</span> <span class="n">mongo</span><span class="o">.</span><span class="n">find</span><span class="p">(</span> <span class="p">{</span><span class="s">&#39;query_key&#39;</span><span class="p">:</span> <span class="n">query_value</span><span class="p">}</span> <span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">my_mongo_cursor</span> <span class="o">=</span> <span class="n">mongo</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s">&#39;query_key&#39;</span><span class="p">:</span> <span class="n">query_value</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="gridfs">
+<h3>GridFS<a class="headerlink" href="#gridfs" title="Permalink to this headline">¶</a></h3>
+<p>Instead of using the <tt class="docutils literal"><span class="pre">api</span></tt> method, use gridfs to store objects as Grid objects.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">my_mongo_cursor</span> <span class="o">=</span> <span class="n">mongo</span><span class="o">.</span><span class="n">gridfs</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">really_big_dictionary</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -117,9 +123,184 @@
 </div>
 <span id="document-Tastypie API"></span><div class="section" id="tastypie-api">
 <h2>Tastypie API<a class="headerlink" href="#tastypie-api" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>The .. _Tastypie: <a class="reference external" href="https://github.com/toastdriven/django-tastypie">https://github.com/toastdriven/django-tastypie</a> module for mongolier</div></blockquote>
+<p>supports many of the basic functions of Tastypie.  Keep in mind, that not everything
+is supported</p>
+<p><strong>Currently Supported</strong></p>
+<ul class="simple">
+<li>CRUD (GET, POST, PATCH, PUT, DELETE)</li>
+<li>Top-level filtering</li>
+</ul>
+<p><strong>Unsupported</strong></p>
+<p>The following features are unsupported, but are on the roadmap for future
+implementation</p>
+<ul class="simple">
+<li>Sorting</li>
+<li>More complex filtering</li>
+</ul>
+<div class="section" id="setup">
+<h3>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>In your api.py, import a connection, and assign it to a resource.</li>
+<li>choose a field for your resource, name it, and dehydrate the bundle into that resource.</li>
+</ul>
+<p><em>(A future version will likely return the document into a standard field by default)</em></p>
+<p><strong>Example</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sb">```api.py```</span>
+
+<span class="kn">from</span> <span class="nn">mongolier.api</span> <span class="kn">import</span> <span class="n">MongoResource</span>
+<span class="kn">from</span> <span class="nn">tastypie</span> <span class="kn">import</span> <span class="n">fields</span>
+
+<span class="kn">from</span> <span class="nn">my_settings</span> <span class="kn">import</span> <span class="n">my_persistent_connection</span>
+
+<span class="k">class</span> <span class="nc">MyResource</span><span class="p">(</span><span class="n">MongoResource</span><span class="p">):</span>
+
+    <span class="n">palms</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">DictField</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">my_persistent_connection</span>
+        <span class="n">resource_name</span> <span class="o">=</span> <span class="s">&#39;my_resource&#39;</span>
+
+    <span class="k">def</span> <span class="nf">dehydrate_palms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle_or_obj</span><span class="p">):</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">bundle_or_obj</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The rest of the Tastypie setup is standard.</p>
+<p>Typical usage would be to create a collection for each resource.</p>
+</div>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<p>To query the example above, follow standard Tastypie patterns:</p>
+<p><tt class="docutils literal"><span class="pre">http://my_site/api/v1/my_resource/format=json</span></tt></p>
+<p>Let&#8217;s say, one of your documents has a top-level parameter of &#8220;face&#8221; with
+a value of 5, you can pass those into the URL and return only the documents
+which match that parameter.</p>
+<p><tt class="docutils literal"><span class="pre">http://my_site/api/v1/my_resource/format=json&amp;face=5</span></tt></p>
+</div>
+<div class="section" id="extending">
+<h3>Extending<a class="headerlink" href="#extending" title="Permalink to this headline">¶</a></h3>
+<p>By default, mongolier will assign your document&#8217;s <tt class="docutils literal"><span class="pre">_id</span></tt> to be the ID available
+at the <tt class="docutils literal"><span class="pre">resource_uri</span></tt>. To change this behavior, override the method ::meth::<cite>get_resource_uri &lt;get_resource_uri</cite>.</p>
+<p>Any functionality that mongolier does not provide, you can override any of the typical tastypie methods,
+as they are available.</p>
+</div>
 </div>
 <span id="document-Utilities"></span><div class="section" id="utilities">
 <h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="management-commands">
+<h3>Management Commands<a class="headerlink" href="#management-commands" title="Permalink to this headline">¶</a></h3>
+<p>Mongolier includes a management commands that emulate Django&#8217;s load and dump data.
+Keep in mind, this are not a replacement for <tt class="docutils literal"><span class="pre">mongoexport</span></tt> or <tt class="docutils literal"><span class="pre">mongoimport</span></tt> (utilities
+that are included with MongoDB), as those tools are more powerful. This is simply
+a tool that is designed to replicate Django&#8217;s management commands so that it tightens
+the link between your data.</p>
+<div class="section" id="available-options">
+<h4>Available options<a class="headerlink" href="#available-options" title="Permalink to this headline">¶</a></h4>
+<p><strong>-d &#8211;database</strong></p>
+<p>MongoDB database name</p>
+<p><strong>-c, &#8211;collection</strong></p>
+<p>MongoDB collection name</p>
+<p><strong>-a, &#8211;auth</strong></p>
+<p>MongoDB auth</p>
+<p><strong>-o, &#8211;respect_id</strong></p>
+<p>When exporting, leave the <tt class="docutils literal"><span class="pre">_id</span></tt> of the original object.  Probably not a good idea
+for ObjectId, because those rely on system information to create. (Though ObjectId is
+supported)</p>
+<p><strong>-g, &#8211;gridfs</strong></p>
+<p>Use GridFS instead of a standard connection</p>
+</div>
+<div class="section" id="mongolier-dumpdata">
+<h4>mongolier_dumpdata<a class="headerlink" href="#mongolier-dumpdata" title="Permalink to this headline">¶</a></h4>
+<p>Very nearly the same behavior as Django&#8217;s dumpdata, except you must specify
+the database, collection, auth, etc.</p>
+<p>Outputs data to stdout.</p>
+<div class="highlight-python"><pre>$ django-admin.py mongolier_dumpdata -d my_db -c my_col --respect_id &gt; /tmp/my_file.json</pre>
+</div>
+</div>
+<div class="section" id="mongolier-loaddata">
+<h4>mongolier_loaddata<a class="headerlink" href="#mongolier-loaddata" title="Permalink to this headline">¶</a></h4>
+<p>Similar to mongolier_dumpdata, except the argument must specify a file to load from.</p>
+<div class="highlight-python"><pre>$ django-admin.py mongolier_dumpdata -d my_db -c my_col --respect_id /tmp/my_file.json</pre>
+</div>
+</div>
+</div>
+<div class="section" id="convert">
+<h3>Convert<a class="headerlink" href="#convert" title="Permalink to this headline">¶</a></h3>
+<p>Mongolier also includes a few conversion utilities that help with Object (<tt class="docutils literal"><span class="pre">python</span></tt>)
+-&gt; Document(<tt class="docutils literal"><span class="pre">MongoDB</span></tt>) manipulation.</p>
+<p>With pymongo, this is done via the <tt class="docutils literal"><span class="pre">json</span></tt> module, however, that is not always ideal.</p>
+<p>Sometimes, you&#8217;d like to transform data and push it directly into MongoDB without going
+through a JSON intermediary.</p>
+<div class="section" id="convert-decimals">
+<h4>Convert decimals<a class="headerlink" href="#convert-decimals" title="Permalink to this headline">¶</a></h4>
+<p>Convert Python Decimal objects to either floats or strings</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mongolier.utils</span> <span class="kn">import</span> <span class="n">ConvertDecimal</span>
+
+<span class="n">converter</span> <span class="o">=</span> <span class="n">ConvertDecimal</span><span class="p">()</span>
+
+<span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">([</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;5&#39;</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>By default, it converts to strings.  To use floats instead, pass <tt class="docutils literal"><span class="pre">to_float</span></tt> into the
+instantiation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">converter</span> <span class="o">=</span> <span class="n">ConvertDecimal</span><span class="p">(</span><span class="n">to_float</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="deserializer">
+<h4>Deserializer<a class="headerlink" href="#deserializer" title="Permalink to this headline">¶</a></h4>
+<p>Remove the python bits that MongoDB doesn&#8217;t like.</p>
+<p>Currently converts:</p>
+<ul class="simple">
+<li>unicode</li>
+<li>decimal</li>
+<li>date</li>
+</ul>
+<p>Coming soon:</p>
+<ul class="simple">
+<li>datetime</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mongolier.utils</span> <span class="kn">import</span> <span class="n">Deserializer</span>
+
+<span class="n">deserializer</span> <span class="o">=</span> <span class="n">Deserializer</span><span class="p">()</span>
+
+<span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">([</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">u&#39;c&#39;</span><span class="p">,</span> <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;5&#39;</span><span class="p">)],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2012</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="extending-the-converter">
+<h3>Extending the converter<a class="headerlink" href="#extending-the-converter" title="Permalink to this headline">¶</a></h3>
+<p>You can extend the Converter class in order to change behavior and add additional
+conversion functionality.</p>
+<p>For example, to convert all datetimes to date strings:</p>
+<ul class="simple">
+<li>Add an object to compare against and a method to <tt class="docutils literal"><span class="pre">__init__</span></tt></li>
+<li>Add that method and do your conversion</li>
+</ul>
+<div class="highlight-python"><pre>```my_new_converter.py```
+
+from mongolier.utils import BaseConvert
+
+
+class DateConverter(BaseConvert):
+
+
+def __init__(self, **kwargs):
+
+    super(Deserializer, self).__init__(**kwargs)
+
+    self.other_input = {
+        datetime.datetime: self.to_date,
+    }
+
+def to_date(self, datetime_obj):
+
+    return(datetime.datetime.strftime(date_obj, '%Y-%m-%d'))</pre>
+</div>
+</div>
 </div>
 <span id="document-Mongolier API Documentation"></span><div class="section" id="mongolier-api-documentation">
 <h2>Mongolier API Documentation<a class="headerlink" href="#mongolier-api-documentation" title="Permalink to this headline">¶</a></h2>
@@ -130,26 +311,32 @@
 <p>mongo_object = connect.MongoConnection(port=222, host=&#8217;myhost&#8217;)</p>
 <p>mongo_connection = mongo_object.connect()</p>
 <dl class="class">
-<dt id="mongolier.db.MongoConnection">
-<em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">MongoConnection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/db.html#MongoConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.db.MongoConnection" title="Permalink to this definition">¶</a></dt>
+<dt id="mongolier.db.BaseConnection">
+<em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">BaseConnection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.db.BaseConnection" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="mongolier.db.MongoConnection.connect">
-<tt class="descname">connect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mongolier/db.html#MongoConnection.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.db.MongoConnection.connect" title="Permalink to this definition">¶</a></dt>
+<dt id="mongolier.db.BaseConnection.connect">
+<tt class="descname">connect</tt><big>(</big><big>)</big><a class="headerlink" href="#mongolier.db.BaseConnection.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect to the mongo instance</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mongolier.db.MongoConnection.gridfs">
-<tt class="descname">gridfs</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mongolier/db.html#MongoConnection.gridfs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.db.MongoConnection.gridfs" title="Permalink to this definition">¶</a></dt>
+<dt id="mongolier.db.BaseConnection.gridfs">
+<tt class="descname">gridfs</tt><big>(</big><big>)</big><a class="headerlink" href="#mongolier.db.BaseConnection.gridfs" title="Permalink to this definition">¶</a></dt>
 <dd><p>A module to connect to GridFS and chunk large files for saving into mongo</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
+<dt id="mongolier.db.MongoConnection">
+<em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">MongoConnection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/db.html#MongoConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.db.MongoConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for BaseConnection so we don&#8217;t break backwards compatibility.</p>
+</dd></dl>
+
+<dl class="class">
 <dt id="mongolier.db.Connection">
 <em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">Connection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.db.Connection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for MongoConnection.</p>
+<dd><p>Alias for BaseConnection so we don&#8217;t break backwards compatibility.</p>
 </dd></dl>
 
 <dl class="class">
@@ -166,14 +353,17 @@
 &#8220;retries&#8221;: 5,</dd>
 </dl>
 <p>})</p>
-<p>You can pass an additional Boolean value, called gridfs, if you need a gridfs connection instead
-of the standard MongoConnection.</p>
 <p>Inside your module, just pull in that connection and query against its api.</p>
-<blockquote>
-<div><p>&#8216;&#8217;&#8216;mymodule.py&#8217;&#8216;&#8217;</p>
-<p>from django.db.settings import my_connection</p>
-<p>my_connection.api.find_one( { &#8220;query_param&#8221;: &#8220;value&#8221; } )</p>
-</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.settings</span> <span class="kn">import</span> <span class="n">my_connection</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_connection</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s">&quot;query_param&quot;</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>For GridFS, use the gridfs API.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_connection</span><span class="o">.</span><span class="n">gridfs</span><span class="o">.</span><span class="n">get_last_version</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s">&quot;query_param&quot;</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -222,6 +412,17 @@ through tastypie&#8217;s methods.</p>
 <dd><p>alias of <a class="reference internal" href="index.html#mongolier.api.MongoStorageObject" title="mongolier.api.MongoStorageObject"><tt class="xref py py-class docutils literal"><span class="pre">MongoStorageObject</span></tt></a></p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="method">
+<dt id="mongolier.api.MongoResource.apply_filters">
+<tt class="descclassname">MongoResource.</tt><tt class="descname">apply_filters</tt><big>(</big><em>request</em>, <em>applicable_filters</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.apply_filters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mongolier.api.MongoResource.build_filters">
+<tt class="descclassname">MongoResource.</tt><tt class="descname">build_filters</tt><big>(</big><em>filters=None</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.build_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deconstructs a GET request to create filter params</p>
 </dd></dl>
 
 <dl class="method">
@@ -284,7 +485,7 @@ that output.</p>
 
 <dl class="attribute">
 <dt id="mongolier.api.MongoResource.base_fields">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">base_fields</tt><em class="property"> = {'resource_uri': &lt;tastypie.fields.CharField object at 0x103f04750&gt;}</em><a class="headerlink" href="#mongolier.api.MongoResource.base_fields" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">MongoResource.</tt><tt class="descname">base_fields</tt><em class="property"> = {'resource_uri': &lt;tastypie.fields.CharField object at 0x105a97550&gt;}</em><a class="headerlink" href="#mongolier.api.MongoResource.base_fields" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -306,7 +507,13 @@ that output.</p>
 <dl class="exception">
 <dt id="mongolier.exceptions.ValueNotSupported">
 <em class="property">exception </em><tt class="descclassname">mongolier.exceptions.</tt><tt class="descname">ValueNotSupported</tt><a class="headerlink" href="#mongolier.exceptions.ValueNotSupported" title="Permalink to this definition">¶</a></dt>
-<dd><p>Not a supported Value</p>
+<dd><p>Not a supported Value.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mongolier.exceptions.DoesNotExist">
+<em class="property">exception </em><tt class="descclassname">mongolier.exceptions.</tt><tt class="descname">DoesNotExist</tt><a class="headerlink" href="#mongolier.exceptions.DoesNotExist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object or Value does not exist.</p>
 </dd></dl>
 
 </div>
@@ -505,6 +712,7 @@ Returns a redirect if there&#8217;s an issue with the page number.</p>
 <li class="toctree-l1"><a class="reference internal" href="index.html#document-Getting Started">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="index.html#make-a-connection">Make a connection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#query">Query</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#gridfs">GridFS</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#document-Using Views">Using Views</a><ul>
@@ -514,8 +722,27 @@ Returns a redirect if there&#8217;s an issue with the page number.</p>
 <li class="toctree-l2"><a class="reference internal" href="index.html#detailview">DetailView</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="index.html#document-Tastypie API">Tastypie API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="index.html#document-Utilities">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-Tastypie API">Tastypie API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#setup">Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#extending">Extending</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-Utilities">Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#management-commands">Management Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#available-options">Available options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#mongolier-dumpdata">mongolier_dumpdata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#mongolier-loaddata">mongolier_loaddata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#convert">Convert</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#convert-decimals">Convert decimals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#deserializer">Deserializer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#extending-the-converter">Extending the converter</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="index.html#document-Mongolier API Documentation">Mongolier API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.db"><tt class="docutils literal"><span class="pre">db</span></tt></a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.api"><tt class="docutils literal"><span class="pre">api</span></tt></a></li>
