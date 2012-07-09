@@ -4,10 +4,13 @@ api.py
 A lightweight implementation of pymongo and django-tastypie
 
 """
-from django.db.models.sql.constants import QUERY_TERMS, LOOKUP_SEP
+import json
+
+from django.db.models.sql.constants import LOOKUP_SEP
 from tastypie.resources import Resource, DeclarativeMetaclass
 from bson.objectid import ObjectId
 
+from mongolier.exceptions import IncorrectParameters
 
 class MongoStorageObject(dict):
     """
@@ -62,17 +65,21 @@ class MongoResource(Resource):
         """
         Deconstructs a GET request to create filter params
         """
-        qs_filters = {}
 
+        print filters.keys()
+        for param in filters.keys():
+            if param not in ['format', 'query']:
+                raise IncorrectParameters("Standard Tastypie query syntax not yet \
+                                            available. Please pass a JSON query into\
+                                            the ``query`` parameter.")
         try:
             filters.pop('format')
         except KeyError:
             pass
 
-        for key, items in filters.items():
-            qs_filters[key] = items
+        filter_in_python = json.loads(filters['query'])
 
-        return(qs_filters)
+        return(filter_in_python)
 
     def get_resource_uri(self, bundle_or_obj):
         """

@@ -16,12 +16,14 @@ query syntax of `pymongo` in.
 * db.py - a connection object for connecting to mongo instances and executing queries
 * views.py - a lightweight replication of Django's class-based views for MongoDB
 * api.py - a lightweight implementation of django-tastypie and mongodb (django-tastypie required)
-* utils.ConvertDecimal - a class for converting decimal objects into strings or floats so they can be inserted into mongo
-* fixture creation and database 'syncing'
+* utils - a series of classes to filter python objects so they can be inserted into mongo
+* fixture creation and database 'syncing' via standard Django management commands
 
 ## RoadMap
 
 * better error handling
+* TASTYPIE: Support for standard query parameters in URL
+
 
 ## Getting started
 
