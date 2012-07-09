@@ -63,7 +63,10 @@ class MongoResource(Resource):
         """
         qs_filters = {}
 
-        filters.pop('format')
+        try:
+            filters.pop('format')
+        except KeyError:
+            pass
 
         for key, items in filters.items():
             qs_filters[key] = items
