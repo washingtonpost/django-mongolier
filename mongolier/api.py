@@ -4,6 +4,7 @@ api.py
 A lightweight implementation of pymongo and django-tastypie
 
 """
+from django.db.models.sql.constants import QUERY_TERMS, LOOKUP_SEP
 from tastypie.resources import Resource, DeclarativeMetaclass
 from bson.objectid import ObjectId
 
