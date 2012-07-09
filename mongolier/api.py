@@ -65,8 +65,6 @@ class MongoResource(Resource):
         """
         Deconstructs a GET request to create filter params
         """
-
-        print filters.keys()
         for param in filters.keys():
             if param not in ['format', 'query']:
                 raise IncorrectParameters("Standard Tastypie query syntax not yet \
