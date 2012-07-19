@@ -123,21 +123,21 @@
 </div>
 <span id="document-Tastypie API"></span><div class="section" id="tastypie-api">
 <h2>Tastypie API<a class="headerlink" href="#tastypie-api" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div>The .. _Tastypie: <a class="reference external" href="https://github.com/toastdriven/django-tastypie">https://github.com/toastdriven/django-tastypie</a> module for mongolier</div></blockquote>
-<p>supports many of the basic functions of Tastypie.  Keep in mind, that not everything
+<p>The <a class="reference external" href="https://github.com/toastdriven/django-tastypie">TastyPie</a>. module for mongolier
+supports many of the basic functions of Tastypie.  Keep in mind, that not everything
 is supported</p>
 <p><strong>Currently Supported</strong></p>
 <ul class="simple">
 <li>CRUD (GET, POST, PATCH, PUT, DELETE)</li>
 <li>Top-level filtering</li>
+<li>More complex filtering via the query parameter</li>
 </ul>
 <p><strong>Unsupported</strong></p>
 <p>The following features are unsupported, but are on the roadmap for future
 implementation</p>
 <ul class="simple">
 <li>Sorting</li>
-<li>More complex filtering</li>
+<li>Filtering based</li>
 </ul>
 <div class="section" id="setup">
 <h3>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h3>
@@ -172,12 +172,33 @@ implementation</p>
 </div>
 <div class="section" id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
-<p>To query the example above, follow standard Tastypie patterns:</p>
+<p>For basic queries (for the example above) follow standard Tastypie patterns:</p>
 <p><tt class="docutils literal"><span class="pre">http://my_site/api/v1/my_resource/format=json</span></tt></p>
 <p>Let&#8217;s say, one of your documents has a top-level parameter of &#8220;face&#8221; with
 a value of 5, you can pass those into the URL and return only the documents
 which match that parameter.</p>
 <p><tt class="docutils literal"><span class="pre">http://my_site/api/v1/my_resource/format=json&amp;face=5</span></tt></p>
+<p>This supports the following query types as well:</p>
+<ul class="simple">
+<li>$all</li>
+<li>$exists</li>
+<li>$mod</li>
+<li>$ne</li>
+<li>$in</li>
+<li>$nin</li>
+<li>$size</li>
+<li>$type</li>
+</ul>
+<p><tt class="docutils literal"><span class="pre">http://my_site/api/v1/my_resource/format=json&amp;face__in=5,10</span></tt></p>
+</div>
+<div class="section" id="advanced-queries">
+<h3>Advanced Queries<a class="headerlink" href="#advanced-queries" title="Permalink to this headline">¶</a></h3>
+<p>If you pass JSON into the <tt class="docutils literal"><span class="pre">query</span></tt> parameter, it ignores all other parameters
+passed, and instead executes the json query.</p>
+<p><tt class="docutils literal"><span class="pre">http://my_site/api/v1/my_resource/format=json&amp;query={&quot;face&quot;:5}</span></tt></p>
+<p>You must have proper JSON.  Be careful about spacing, it can have undesired
+consequences. In general, I tend to pass a JSON query with no spaces except within
+quoted strings.</p>
 </div>
 <div class="section" id="extending">
 <h3>Extending<a class="headerlink" href="#extending" title="Permalink to this headline">¶</a></h3>
@@ -399,6 +420,21 @@ through tastypie&#8217;s methods.</p>
 <dt>A class that can be subclassed in order to plug a mongo document</dt>
 <dd>resource directly into an API</dd>
 </dl>
+<dl class="attribute">
+<dt id="mongolier.api.MongoResource.invalid_filter_types">
+<tt class="descname">invalid_filter_types</tt><em class="property"> = ['format', 'callback']</em><a class="headerlink" href="#mongolier.api.MongoResource.invalid_filter_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mongolier.api.MongoResource.query_terms">
+<tt class="descname">query_terms</tt><em class="property"> = ['all', 'exists', 'mod', 'ne', 'in', 'nin', 'size', 'type']</em><a class="headerlink" href="#mongolier.api.MongoResource.query_terms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mongolier.api.MongoResource.unsupported_query_terms">
+<tt class="descname">unsupported_query_terms</tt><em class="property"> = ['and', 'or', 'nor']</em><a class="headerlink" href="#mongolier.api.MongoResource.unsupported_query_terms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="class">
 <dt id="mongolier.api.MongoResource.Meta">
 <em class="property">class </em><tt class="descname">Meta</tt><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.Meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.Meta" title="Permalink to this definition">¶</a></dt>
@@ -419,6 +455,12 @@ through tastypie&#8217;s methods.</p>
 <dt id="mongolier.api.MongoResource.apply_filters">
 <tt class="descclassname">MongoResource.</tt><tt class="descname">apply_filters</tt><big>(</big><em>request</em>, <em>applicable_filters</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.apply_filters" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="mongolier.api.MongoResource.filter_query_to_mongo">
+<tt class="descclassname">MongoResource.</tt><tt class="descname">filter_query_to_mongo</tt><big>(</big><em>value</em>, <em>field_name</em>, <em>filters</em>, <em>filter_expr</em>, <em>filter_type</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.filter_query_to_mongo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn the string <tt class="docutils literal"><span class="pre">value</span></tt> into a python object.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.build_filters">
@@ -486,7 +528,7 @@ that output.</p>
 
 <dl class="attribute">
 <dt id="mongolier.api.MongoResource.base_fields">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">base_fields</tt><em class="property"> = {'resource_uri': &lt;tastypie.fields.CharField object at 0x109f86510&gt;}</em><a class="headerlink" href="#mongolier.api.MongoResource.base_fields" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">MongoResource.</tt><tt class="descname">base_fields</tt><em class="property"> = {'resource_uri': &lt;tastypie.fields.CharField object at 0x10486a410&gt;}</em><a class="headerlink" href="#mongolier.api.MongoResource.base_fields" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -726,6 +768,7 @@ Returns a redirect if there&#8217;s an issue with the page number.</p>
 <li class="toctree-l1"><a class="reference internal" href="index.html#document-Tastypie API">Tastypie API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="index.html#setup">Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#advanced-queries">Advanced Queries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#extending">Extending</a></li>
 </ul>
 </li>
