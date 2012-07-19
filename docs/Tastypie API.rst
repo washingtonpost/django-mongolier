@@ -1,14 +1,16 @@
 Tastypie API
 =============
 
- The .. _Tastypie: https://github.com/toastdriven/django-tastypie module for mongolier
+The `TastyPie <https://github.com/toastdriven/django-tastypie>`_. module for mongolier
 supports many of the basic functions of Tastypie.  Keep in mind, that not everything
 is supported
+
 
 **Currently Supported**
 
 * CRUD (GET, POST, PATCH, PUT, DELETE)
 * Top-level filtering
+* More complex filtering via the query parameter
 
 **Unsupported**
 
@@ -16,8 +18,7 @@ The following features are unsupported, but are on the roadmap for future
 implementation
 
 * Sorting
-* More complex filtering
-
+* Filtering based
 
 Setup
 -----
@@ -59,7 +60,8 @@ Typical usage would be to create a collection for each resource.
 Usage
 -----
 
-To query the example above, follow standard Tastypie patterns:
+
+For basic queries (for the example above) follow standard Tastypie patterns:
 
 ``http://my_site/api/v1/my_resource/format=json``
 
@@ -68,6 +70,33 @@ a value of 5, you can pass those into the URL and return only the documents
 which match that parameter.
 
 ``http://my_site/api/v1/my_resource/format=json&face=5``
+
+This supports the following query types as well:
+
+* $all
+* $exists
+* $mod
+* $ne
+* $in
+* $nin
+* $size
+* $type
+
+``http://my_site/api/v1/my_resource/format=json&face__in=5,10``
+
+Advanced Queries
+----------------
+
+If you pass JSON into the ``query`` parameter, it ignores all other parameters
+passed, and instead executes the json query.
+
+``http://my_site/api/v1/my_resource/format=json&query={"face":5}``
+
+You must have proper JSON.  Be careful about spacing, it can have undesired
+consequences. In general, I tend to pass a JSON query with no spaces except within
+quoted strings.
+
+
 
 Extending
 ---------

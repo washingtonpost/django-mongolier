@@ -10,7 +10,6 @@ from django.db.models.sql.constants import LOOKUP_SEP
 from tastypie.resources import Resource, DeclarativeMetaclass
 from bson.objectid import ObjectId
 
-from mongolier.exceptions import IncorrectParameters
 
 class MongoStorageObject(dict):
     """
@@ -48,6 +47,19 @@ class MongoResource(Resource):
     """
     __metaclass__ = MongoDeclarativeMetaclass
 
+    invalid_filter_types = ['format', 'callback']
+
+    query_terms = ['all',
+                   'exists',
+                   'mod',
+                   'ne',
+                   'in',
+                   'nin',
+                   'size',
+                   'type']
+
+    unsupported_query_terms = ['and', 'or', 'nor']
+
     class Meta:
         connection = None
 
@@ -61,23 +73,66 @@ class MongoResource(Resource):
 
         return(results)
 
+    def filter_query_to_mongo(self, value, field_name, filters, filter_expr,
+            filter_type):
+        """
+        Turn the string ``value`` into a python object.
+        """
+        # Simple values
+        if value in ['true', 'True', True]:
+            value = True
+        elif value in ['false', 'False', False]:
+            value = False
+        elif value in ('nil', 'none', 'None', None):
+            value = None
+
+        # Split on ',' if not empty string and has attr ``getlist``
+
+        if filter_type == 'exact':
+            return {field_name: value}
+
+        elif len(value):
+            if hasattr(filters, 'getlist'):
+                value = []
+
+                for part in filters.getlist(filter_expr):
+                    value.extend(part.split(','))
+
+            return({field_name: {'$%s' % filter_type: value}})
+
     def build_filters(self, filters=None):
         """
         Deconstructs a GET request to create filter params
         """
-        for param in filters.keys():
-            if param not in ['format', 'query']:
-                raise IncorrectParameters("Standard Tastypie query syntax not yet \
-                                            available. Please pass a JSON query into\
-                                            the ``query`` parameter.")
+        # If the filter includes a query parameter, assume the user is
+        # passing a JSON query to thye URL string and ignore any other parameters
+
+        if filters.get('query'):
+            qs_filters = json.loads(filters['query'])
+            return(qs_filters)
+
+        # Otherwise, construct a query from the parameters passed.
+
         try:
-            filters.pop('format')
+            [filters.pop(filter_type) for filter_type in self.invalid_filter_types]
         except KeyError:
             pass
 
-        filter_in_python = json.loads(filters['query'])
+        qs_filters = {}
 
-        return(filter_in_python)
+        for filter_expr, value in filters.items():
+            filter_bits = filter_expr.split(LOOKUP_SEP)
+            field_name = filter_bits.pop(0)
+            filter_type = 'exact'
+
+            if len(filter_bits) and filter_bits[-1] in self.query_terms:
+                filter_type = filter_bits.pop()
+
+            query = self.filter_query_to_mongo(value, field_name,
+                filters, filter_expr, filter_type)
+
+            qs_filters.update(query)
+            return(qs_filters)
 
     def get_resource_uri(self, bundle_or_obj):
         """

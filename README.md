@@ -23,6 +23,7 @@ query syntax of `pymongo` in.
 
 * better error handling
 * TASTYPIE: Support for standard query parameters in URL
+* tests (super duh)
 
 
 ## Getting started
