@@ -3,11 +3,6 @@ views.py
 
 A module that replicates django's class based views for mongodb
 
-I am sure everyone has something like this already.
-I think PyDanny may have even built this into Django-Mongonaut.
-But I needed to have this without installing any extra stuff.
-Please enjoy version 0.0.3 of my class-based list/detail views for PyMongo.
--Jeremy
 """
 try:
     from django.db.settings import DEFAULT_PAGINATION
@@ -21,21 +16,22 @@ from django.template.response import TemplateResponse
 from bson.objectid import ObjectId
 from mongolier import MongoConnection
 
+
 class BaseMongoMixin(object):
-    db_name                     = None
-    collection_name             = None
-    query_sort                  = None
-    query_results               = None
-    query_dict                  = None
-    context_object_name         = None
-    template_name               = None
-    class_type                  = None
-    auth_string                 = None
+    db_name = None
+    collection_name = None
+    query_sort = None
+    query_results = None
+    query_dict = None
+    context_object_name = None
+    template_name = None
+    class_type = None
+    auth_string = None
 
     def get_context_data(self, *args, **kwargs):
-        context                             = { 'object_list': self.query_results }
+        context = {'object_list': self.query_results}
         context.update(**kwargs)
-        context[self.context_object_name]   = self.query_results
+        context[self.context_object_name] = self.query_results
         return context
 
     def get_template_name(self):
@@ -45,37 +41,37 @@ class BaseMongoMixin(object):
             return self.template_name
 
     def render_to_response(self, context):
-        return TemplateResponse(
-            request = self.request,
-            template = self.get_template_name(),
-            context=context,
-        )
+        return TemplateResponse(request=self.request,
+            template=self.get_template_name(),
+            context=context,)
+
 
 class BasePaginatedMongoMixin(BaseMongoMixin):
-    pages                       = None
-    page                        = None
-    next_page_number            = None
-    previous_page_number        = None
-    offset                      = None
-    pagination_limit            = DEFAULT_PAGINATION
-    page_range                  = None
+    pages = None
+    page = None
+    next_page_number = None
+    previous_page_number = None
+    offset = None
+    pagination_limit = DEFAULT_PAGINATION
+    page_range = None
 
     def get_context_data(self, *args, **kwargs):
         context = super(BasePaginatedMongoMixin, self).get_context_data(*args, **kwargs)
-        context['page']                     = self.page
-        context['pages']                    = self.pages
-        context['page_range']               = self.page_range
-        context['previous_page_number']     = self.previous_page_number
-        context['next_page_number']         = self.next_page_number
+        context['page'] = self.page
+        context['pages'] = self.pages
+        context['page_range'] = self.page_range
+        context['previous_page_number'] = self.previous_page_number
+        context['next_page_number'] = self.next_page_number
         return context
 
+
 class DetailView(BaseMongoMixin, View):
-    class_type          = 'detail'
+    class_type = 'detail'
 
     def get_object(self, *args, **kwargs):
-        mongo_object        = MongoConnection(db=self.db_name, collection=self.collection_name, auth=self.auth_string)
-        connection          = mongo_object.connect()
-        query               = connection.find_one(ObjectId(str(self.kwargs[self.query_filter['kwargs']['url_kwarg']])))
+        mongo_object = MongoConnection(db=self.db_name, collection=self.collection_name, auth=self.auth_string)
+        connection = mongo_object.connect()
+        query = connection.find_one(ObjectId(str(self.kwargs[self.query_filter['kwargs']['url_kwarg']])))
         if query == None:
             raise Http404(u"List is empty.")
         else:
@@ -118,7 +114,7 @@ class ListView(BasePaginatedMongoMixin, View):
     Provides a generic list view for MongoDB.
     """
     # Set the class type.
-    class_type          = 'list'
+    class_type = 'list'
 
     def get_list(self, *args, **kwargs):
         """
@@ -126,25 +122,25 @@ class ListView(BasePaginatedMongoMixin, View):
         """
 
         # Set up the mongo connection.
-        mongo_object    = MongoConnection(db=self.db_name, collection=self.collection_name, auth=self.auth_string)
-        connection      = mongo_object.connect()
+        mongo_object = MongoConnection(db=self.db_name, collection=self.collection_name, auth=self.auth_string)
+        connection = mongo_object.connect()
 
         # Get the total count and the number of pages.
-        total_count     = connection.find(self.query_dict).count()
+        total_count = connection.find(self.query_dict).count()
 
         if (total_count % self.pagination_limit) > 0:
-            self.pages      = (total_count / self.pagination_limit) + 1
+            self.pages = (total_count / self.pagination_limit) + 1
         else:
-            self.pages      = (total_count / self.pagination_limit)
+            self.pages = (total_count / self.pagination_limit)
 
         if self.pages == 1:
             self.page_range = [1]
         else:
-            self.page_range = range(1,self.pages+1)
+            self.page_range = range(1, self.pages + 1)
 
         try:
             query_kwargs = self.query_filter['kwargs']
-            query_filter = { query_kwargs['mongo_field']: self.kwargs[query_kwargs['url_kwarg']] }
+            query_filter = {query_kwargs['mongo_field']: self.kwargs[query_kwargs['url_kwarg']]}
 
         except Exception, e:
             print Exception, e
@@ -152,7 +148,7 @@ class ListView(BasePaginatedMongoMixin, View):
 
         try:
             # Try to get the page from the URL.
-            self.page   = int(self.request.GET['page'])
+            self.page = int(self.request.GET['page'])
 
             # If we can get the page from the URL, calculate the offset.
 
@@ -167,7 +163,7 @@ class ListView(BasePaginatedMongoMixin, View):
             elif self.page <= self.pages:
 
                 # If so, set the offset to the 1-indexed page number * the pagination limit.
-                self.offset = (self.page-1) * self.pagination_limit
+                self.offset = (self.page - 1) * self.pagination_limit
 
                 # Set the previous/next page numbers.
                 if self.page == 1 and self.page == self.pages:
@@ -209,7 +205,7 @@ class ListView(BasePaginatedMongoMixin, View):
             self.offset = 0
 
             # If so, set the offset to the 1-indexed page number * the pagination limit.
-            self.offset = (self.page-1) * self.pagination_limit
+            self.offset = (self.page - 1) * self.pagination_limit
 
             # Set the previous/next page numbers.
             if self.page == 1 and self.page == self.pages:

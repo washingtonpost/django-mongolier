@@ -180,12 +180,13 @@ class Connection(BaseConnection):
     >>> my_connection.gridfs.get_last_version(**{"query_param": "value"})
     """
 
-    def __init__(self, *args, **kwargs):
-        super(Connection, self).__init__(*args, **kwargs)
+    @property
+    def api(self):
+        return(self.connect())
 
-        self.fs = self.gridfs()
-
-        self.api = self.connect()
+    @property
+    def fs(self):
+        return(self.gridfs())
 
 
 class PersistentConnection(Connection):
