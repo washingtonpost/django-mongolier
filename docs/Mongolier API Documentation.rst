@@ -4,35 +4,34 @@ Mongolier API Documentation
 :mod:`db`
 ----------------
 
-.. automodule:: mongolier.db
-    :members:
-    :undoc-members:
+.. module:: mongolier.db
+
+.. autoclass:: Connection
+
 
 :mod:`api`
 -----------------
 
 .. automodule:: mongolier.api
     :members:
-    :undoc-members:
-
-:mod:`exceptions`
-------------------------
-
-.. automodule:: mongolier.exceptions
-    :members:
-    :undoc-members:
 
 :mod:`utils`
 -------------------
 
-.. automodule:: mongolier.utils
+.. automodule:: mongolier.utils.convert
     :members:
-    :undoc-members:
+
+.. automodule:: mongolier.utils.fixtures
+    :members:
 
 :mod:`views`
 -------------------
 
 .. automodule:: mongolier.views
     :members:
-    :undoc-members:
 
+:mod:`exceptions`
+------------------------
+
+.. automodule:: mongolier.exceptions
+    :members:

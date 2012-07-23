@@ -1,12 +1,7 @@
 """
-A base class for connecting to the MongoDB
+db.py
 
-Usage:
-
-mongo_object = connect.MongoConnection(port=222, host='myhost')
-
-mongo_connection = mongo_object.connect()
-
+A class for connecting to a MongoDB instance
 """
 import time
 import pymongo
@@ -22,50 +17,45 @@ class BaseConnection(object):
         """
         Instantiate the Mongo class
 
-        This can take up to four optional arguments, all of which help
+        This can take optional arguments, all of which help
             connect to the right database
 
-        Optional args:
-        :: port
-        Port where you post Mongo data to
-        :: localhost
-        Mongo database host
-        :: db
-        Mongo db, a db is a series of collections
-        :: auth
-        A string that contains username and password, separated by :
-        For example
-            testuser:testpassword
-
-        :: collection
-        Collection, where the actual data is stored
         """
         self.args = args
 
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+        #: The port that the MongoDB connection lives on
         if not kwargs.get('port'):
             self.port = 27017
 
+        #: The host or IP address to connect to
         if not kwargs.get('host'):
             self.host = 'localhost'
 
+        #: The name of the database
         if not kwargs.get('db'):
             self.db = 'test_db'
 
+        #: The name of the collection
         if not kwargs.get('collection'):
             self.collection = 'test_col'
 
+        #: DEPRECATED: Auth parameters `username:password`
         if not kwargs.get('auth'):
             self.auth = None
 
+        #: The database username
         if not kwargs.get('username'):
             self.username = None
 
+        #: The database password
         if not kwargs.get('password'):
             self.password = None
 
+        #: The number of retries to attempt to reconnect after a connection
+        # is dropped.
         if not kwargs.get('retries'):
             self.max_retries = 2
 
@@ -163,30 +153,27 @@ class MongoConnection(BaseConnection):
 
 class Connection(BaseConnection):
     """
-    Alias for BaseConnection so we don't break backwards compatibility.
-    """
-
-
-class PersistentConnection(BaseConnection):
-    """
     A wrapper for MongoConnection that stores a persistent set of connection information
 
     Import PersistentConnection from mongolier, and pass in the proper kwargs.
 
-    my_connection = PersistentConnection(**{
-        "database": "my_db",
-        "collection": "my_collection",
-        "port": 27017,
-        "auth": "my_login:my_pass",
-        "retries": 5,
-    })
+    ::
+
+        my_connection = PersistentConnection(**{
+            "database": "my_db",
+            "collection": "my_collection",
+            "port": 27017,
+            "auth": "my_login:my_pass",
+            "retries": 5,
+        })
 
 
     Inside your module, just pull in that connection and query against its api.
 
-    >>> from django.db.settings import my_connection
+    ::
 
-    >>> my_connection.api.find_one({"query_param": "value"})
+        from django.db.settings import my_connection
+        my_connection.api.find_one({"query_param": "value"})
 
     For GridFS, use the gridfs API.
 
@@ -194,8 +181,14 @@ class PersistentConnection(BaseConnection):
     """
 
     def __init__(self, *args, **kwargs):
-        super(PersistentConnection, self).__init__(*args, **kwargs)
+        super(Connection, self).__init__(*args, **kwargs)
 
         self.fs = self.gridfs()
 
         self.api = self.connect()
+
+
+class PersistentConnection(Connection):
+    """
+    Alias for Connection so we don't break backwards compatibility.
+    """

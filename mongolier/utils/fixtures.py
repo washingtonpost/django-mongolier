@@ -11,6 +11,7 @@ import json
 from bson import json_util
 from bson.objectid import ObjectId
 
+
 class FixtureBase(object):
     """
     FixtureBase
@@ -22,6 +23,7 @@ class FixtureBase(object):
 
         self.connection = connection
         self.respect_id = respect_id
+
 
 class CreateFixture(FixtureBase):
     """
@@ -53,7 +55,6 @@ class CreateFixture(FixtureBase):
 
             fixture_dict[key] = document
 
-
         sys.stdout.write(json.dumps(fixture_dict, default=json_util.default, indent=2))
 
 
@@ -64,9 +65,9 @@ class LoadFixture(FixtureBase):
     """
 
     def load(self, fixture):
-       """
-       Load a fixture into MongoDB
-       """
+        """
+        Load a fixture into MongoDB
+        """
         with open(fixture, 'rb') as fixtures_file_obj:
             fixture_dict = json.load(fixtures_file_obj, object_hook=json_util.object_hook)
 
