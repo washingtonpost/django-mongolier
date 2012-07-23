@@ -13,6 +13,8 @@ import pymongo
 from pymongo.errors import AutoReconnect, ConnectionFailure, OperationFailure
 from gridfs import GridFS
 from mongolier.exceptions import IncorrectParameters
+from warnings import warn
+
 
 class BaseConnection(object):
 
@@ -58,43 +60,74 @@ class BaseConnection(object):
         if not kwargs.get('auth'):
             self.auth = None
 
+        if not kwargs.get('username'):
+            self.username = None
+
+        if not kwargs.get('password'):
+            self.password = None
+
         if not kwargs.get('retries'):
             self.max_retries = 2
 
-        self._retries = 0
+        deprecated = ['auth']
 
-    def _connect_to_db(self):
+        # Check for deprecated kwargs, and warn accordingly
+        for kwarg in deprecated:
+            if kwarg in kwargs:
+                warn('%s is deprecated and will be removed in v 0.2.0' % kwarg, DeprecationWarning)
+
+    def _connect_to_db(self, retries=0):
         """
         Connect to the database, but do not initialize a connection.
 
         Depending on which public method is used, it initiates either a standard
             mongo connection or a gridfs connection
         """
+        retries = retries
 
         try:
+            # Establish a Connection
             connection = pymongo.Connection(self.host, self.port)
 
+            # Establish a database
             database = connection[self.db]
 
-            if self.auth is not None:
-                self.auth = self.auth.split(':')
+            # If user passed username and password args, give that to authenticate
+            if self.username and self.password:
+                database.authenticate(self.auth[0], self.auth[1])
+
+            # Else, look for the deprecated auth key
+            elif self.auth is not None:
+                try:
+                    self.auth = self.auth.split(':')
+
+                # If self.auth is already a list, just pass
+                except AttributeError:
+                    pass
                 if len(self.auth) != 2:
                     raise IncorrectParameters('Incorrect auth params, you passed %s' % self.auth)
 
                 database.authenticate(self.auth[0], self.auth[1])
 
+        # Handle the following exceptions, if retries is less than what is
+        # passed into this method, attempt to connect again.  Otherwise,
+        # raise the proper exception.
         except AutoReconnect, error_message:
             time.sleep(2)
-            if self._retries <= self.max_retries:
-                self._connect_to_db()
+            retries += 1
+
+            if retries <= self.max_retries:
+                self._connect_to_db(retries=retries)
             else:
                 raise ConnectionFailure('Max number of retries (%s) reached. Error: %s'\
                                          % (self.max_retries, error_message))
 
         except OperationFailure, error_message:
             time.sleep(2)
-            if self._retries <= self.max_retries:
-                self._connect_to_db()
+            retries += 1
+
+            if retries <= self.max_retries:
+                self._connect_to_db(retries=retries)
             else:
                 raise OperationFailure('Max number of retries (%s) reached. Error: %s'\
                                          % (self.max_retries, error_message))
@@ -127,10 +160,12 @@ class MongoConnection(BaseConnection):
     Alias for BaseConnection so we don't break backwards compatibility.
     """
 
+
 class Connection(BaseConnection):
     """
     Alias for BaseConnection so we don't break backwards compatibility.
     """
+
 
 class PersistentConnection(BaseConnection):
     """
