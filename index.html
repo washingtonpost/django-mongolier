@@ -328,58 +328,23 @@ conversion functionality.</p>
 <h2>Mongolier API Documentation<a class="headerlink" href="#mongolier-api-documentation" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-mongolier.db">
 <span id="db"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">db</span></tt><a class="headerlink" href="#module-mongolier.db" title="Permalink to this headline">¶</a></h3>
-<p>A base class for connecting to the MongoDB</p>
-<p>Usage:</p>
-<p>mongo_object = connect.MongoConnection(port=222, host=&#8217;myhost&#8217;)</p>
-<p>mongo_connection = mongo_object.connect()</p>
-<dl class="class">
-<dt id="mongolier.db.BaseConnection">
-<em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">BaseConnection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.db.BaseConnection" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="mongolier.db.BaseConnection.connect">
-<tt class="descname">connect</tt><big>(</big><big>)</big><a class="headerlink" href="#mongolier.db.BaseConnection.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Connect to the mongo instance</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="mongolier.db.BaseConnection.gridfs">
-<tt class="descname">gridfs</tt><big>(</big><big>)</big><a class="headerlink" href="#mongolier.db.BaseConnection.gridfs" title="Permalink to this definition">¶</a></dt>
-<dd><p>A module to connect to GridFS and chunk large files for saving into mongo</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="mongolier.db.MongoConnection">
-<em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">MongoConnection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/db.html#MongoConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.db.MongoConnection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for BaseConnection so we don&#8217;t break backwards compatibility.</p>
-</dd></dl>
-
 <dl class="class">
 <dt id="mongolier.db.Connection">
 <em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">Connection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.db.Connection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for BaseConnection so we don&#8217;t break backwards compatibility.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="mongolier.db.PersistentConnection">
-<em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">PersistentConnection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.db.PersistentConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper for MongoConnection that stores a persistent set of connection information</p>
 <p>Import PersistentConnection from mongolier, and pass in the proper kwargs.</p>
-<dl class="docutils">
-<dt>my_connection = PersistentConnection(<a href="#id1"><span class="problematic" id="id2">**</span></a>{</dt>
-<dd>&#8220;database&#8221;: &#8220;my_db&#8221;,
-&#8220;collection&#8221;: &#8220;my_collection&#8221;,
-&#8220;port&#8221;: 27017,
-&#8220;auth&#8221;: &#8220;my_login:my_pass&#8221;,
-&#8220;retries&#8221;: 5,</dd>
-</dl>
-<p>})</p>
-<p>Inside your module, just pull in that connection and query against its api.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.settings</span> <span class="kn">import</span> <span class="n">my_connection</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">my_connection</span> <span class="o">=</span> <span class="n">PersistentConnection</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
+    <span class="s">&quot;database&quot;</span><span class="p">:</span> <span class="s">&quot;my_db&quot;</span><span class="p">,</span>
+    <span class="s">&quot;collection&quot;</span><span class="p">:</span> <span class="s">&quot;my_collection&quot;</span><span class="p">,</span>
+    <span class="s">&quot;port&quot;</span><span class="p">:</span> <span class="mi">27017</span><span class="p">,</span>
+    <span class="s">&quot;auth&quot;</span><span class="p">:</span> <span class="s">&quot;my_login:my_pass&quot;</span><span class="p">,</span>
+    <span class="s">&quot;retries&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="p">})</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_connection</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s">&quot;query_param&quot;</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">})</span>
+<p>Inside your module, just pull in that connection and query against its api.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">django.db.settings</span> <span class="kn">import</span> <span class="n">my_connection</span>
+<span class="n">my_connection</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s">&quot;query_param&quot;</span><span class="p">:</span> <span class="s">&quot;value&quot;</span><span class="p">})</span>
 </pre></div>
 </div>
 <p>For GridFS, use the gridfs API.</p>
@@ -399,11 +364,6 @@ conversion functionality.</p>
 <dd><p>An object that stores information for data before it is transferred
 to Mongo.  It&#8217;s a placeholder so that information can be properly passed
 through tastypie&#8217;s methods.</p>
-<dl class="attribute">
-<dt id="mongolier.api.MongoStorageObject.pk">
-<tt class="descname">pk</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.api.MongoStorageObject.pk" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -420,94 +380,58 @@ through tastypie&#8217;s methods.</p>
 <dt>A class that can be subclassed in order to plug a mongo document</dt>
 <dd>resource directly into an API</dd>
 </dl>
-<dl class="attribute">
-<dt id="mongolier.api.MongoResource.invalid_filter_types">
-<tt class="descname">invalid_filter_types</tt><em class="property"> = ['format', 'callback']</em><a class="headerlink" href="#mongolier.api.MongoResource.invalid_filter_types" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.api.MongoResource.query_terms">
-<tt class="descname">query_terms</tt><em class="property"> = ['all', 'exists', 'mod', 'ne', 'in', 'nin', 'size', 'type']</em><a class="headerlink" href="#mongolier.api.MongoResource.query_terms" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.api.MongoResource.unsupported_query_terms">
-<tt class="descname">unsupported_query_terms</tt><em class="property"> = ['and', 'or', 'nor']</em><a class="headerlink" href="#mongolier.api.MongoResource.unsupported_query_terms" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="class">
-<dt id="mongolier.api.MongoResource.Meta">
-<em class="property">class </em><tt class="descname">Meta</tt><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.Meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.Meta" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="mongolier.api.MongoResource.Meta.connection">
-<tt class="descname">connection</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.api.MongoResource.Meta.connection" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.api.MongoResource.Meta.object_class">
-<tt class="descname">object_class</tt><a class="headerlink" href="#mongolier.api.MongoResource.Meta.object_class" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="index.html#mongolier.api.MongoStorageObject" title="mongolier.api.MongoStorageObject"><tt class="xref py py-class docutils literal"><span class="pre">MongoStorageObject</span></tt></a></p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="method">
-<dt id="mongolier.api.MongoResource.apply_filters">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">apply_filters</tt><big>(</big><em>request</em>, <em>applicable_filters</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.apply_filters" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="method">
 <dt id="mongolier.api.MongoResource.filter_query_to_mongo">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">filter_query_to_mongo</tt><big>(</big><em>value</em>, <em>field_name</em>, <em>filters</em>, <em>filter_expr</em>, <em>filter_type</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.filter_query_to_mongo" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">filter_query_to_mongo</tt><big>(</big><em>value</em>, <em>field_name</em>, <em>filters</em>, <em>filter_expr</em>, <em>filter_type</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.filter_query_to_mongo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Turn the string <tt class="docutils literal"><span class="pre">value</span></tt> into a python object.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.build_filters">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">build_filters</tt><big>(</big><em>filters=None</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.build_filters" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">build_filters</tt><big>(</big><em>filters=None</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.build_filters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deconstructs a GET request to create filter params</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.get_resource_uri">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">get_resource_uri</tt><big>(</big><em>bundle_or_obj</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.get_resource_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.get_resource_uri" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_resource_uri</tt><big>(</big><em>bundle_or_obj</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.get_resource_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.get_resource_uri" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method that returns the URI for an indvidual object. Uses the
 <tt class="docutils literal"><span class="pre">ObjectID</span></tt> as the id in the URI</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.get_object_list">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">get_object_list</tt><big>(</big><em>request</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.get_object_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.get_object_list" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_object_list</tt><big>(</big><em>request</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.get_object_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.get_object_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method to return a list of objects.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.obj_get_list">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">obj_get_list</tt><big>(</big><em>request=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.obj_get_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.obj_get_list" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">obj_get_list</tt><big>(</big><em>request=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.obj_get_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.obj_get_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method to to enable filtering on a list</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.obj_get">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">obj_get</tt><big>(</big><em>request=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.obj_get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.obj_get" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">obj_get</tt><big>(</big><em>request=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.obj_get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.obj_get" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method required to get a single object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.obj_create">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">obj_create</tt><big>(</big><em>bundle</em>, <em>request=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.obj_create" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">obj_create</tt><big>(</big><em>bundle</em>, <em>request=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.obj_create" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method to create an object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.obj_update">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">obj_update</tt><big>(</big><em>bundle</em>, <em>request=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.obj_update" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">obj_update</tt><big>(</big><em>bundle</em>, <em>request=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.obj_update" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method to update an object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.obj_delete">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">obj_delete</tt><big>(</big><em>request=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.obj_delete" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">obj_delete</tt><big>(</big><em>request=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.obj_delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method to delete a single object.</p>
 <p>Does not return a success or failure statement, MongoDB does not have
 that output.</p>
@@ -515,26 +439,154 @@ that output.</p>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.obj_delete_list">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">obj_delete_list</tt><big>(</big><em>request=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.obj_delete_list" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">obj_delete_list</tt><big>(</big><em>request=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.obj_delete_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method to delete an entire list of objects</p>
 <p>Same pattern as <a class="reference internal" href="index.html#mongolier.api.MongoResource.obj_delete" title="mongolier.api.MongoResource.obj_delete"><tt class="xref py py-meth docutils literal"><span class="pre">obj_delete</span></tt></a></p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.rollback">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">rollback</tt><big>(</big><em>bundles</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.rollback" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">rollback</tt><big>(</big><em>bundles</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.rollback" title="Permalink to this definition">¶</a></dt>
 <dd><p>UNUSED</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="mongolier.api.MongoResource.base_fields">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">base_fields</tt><em class="property"> = {'resource_uri': &lt;tastypie.fields.CharField object at 0x10486a410&gt;}</em><a class="headerlink" href="#mongolier.api.MongoResource.base_fields" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+</dd></dl>
 
-<dl class="attribute">
-<dt id="mongolier.api.MongoResource.declared_fields">
-<tt class="descclassname">MongoResource.</tt><tt class="descname">declared_fields</tt><em class="property"> = {}</em><a class="headerlink" href="#mongolier.api.MongoResource.declared_fields" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+</div>
+<div class="section" id="module-mongolier.utils.convert">
+<span id="utils"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">utils</span></tt><a class="headerlink" href="#module-mongolier.utils.convert" title="Permalink to this headline">¶</a></h3>
+<p>convert.py</p>
+<p>Contains utilities and tools for pymongo</p>
+<dl class="class">
+<dt id="mongolier.utils.convert.BaseConvert">
+<em class="property">class </em><tt class="descclassname">mongolier.utils.convert.</tt><tt class="descname">BaseConvert</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/convert.html#BaseConvert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.convert.BaseConvert" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object contains the base elements required to convert a python
+object into a Mongo object.</p>
+<p>Includes the methods decode_dict and decode_list</p>
+<p>You can pass a kwarg with additional types of input
+in order to have more parameters evaluated.</p>
+<p><cite>other_input</cite> is a dictionary where the key is the object type to be evaluated
+and the value is the method call in which to evaluate the key against.</p>
+<dl class="method">
+<dt id="mongolier.utils.convert.BaseConvert.convert">
+<tt class="descname">convert</tt><big>(</big><em>iterable</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/convert.html#BaseConvert.convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.convert.BaseConvert.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Public method to convert.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mongolier.utils.convert.ConvertDecimal">
+<em class="property">class </em><tt class="descclassname">mongolier.utils.convert.</tt><tt class="descname">ConvertDecimal</tt><big>(</big><em>to_float=False</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/convert.html#ConvertDecimal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.convert.ConvertDecimal" title="Permalink to this definition">¶</a></dt>
+<dd><p>A tool to handle python&#8217;s Decimal objects
+and convert them to a type that MongoDB
+can handle.</p>
+<p>Default is to convert to strings</p>
+<p>You can select floats by passing float=True to the instantiation
+of the class.</p>
+<p>Support for dict, list</p>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">common.mongo.utils</span> <span class="kn">import</span> <span class="n">ConvertDecimal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_list</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;111223.22&#39;</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converted_list</span> <span class="o">=</span> <span class="n">ConvertDecimal</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+<span class="go">Out[]: converted_list = [&#39;111223.22&#39;]</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="mongolier.utils.convert.ConvertDecimal.decode_dec">
+<tt class="descname">decode_dec</tt><big>(</big><em>decimal_obj</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/convert.html#ConvertDecimal.decode_dec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.convert.ConvertDecimal.decode_dec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a Decimal object to a</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mongolier.utils.convert.Deserializer">
+<em class="property">class </em><tt class="descclassname">mongolier.utils.convert.</tt><tt class="descname">Deserializer</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/convert.html#Deserializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.convert.Deserializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A helper class that deserializes json so that it can properly loaded into Mongo.</p>
+<p>Emulate&#8217;s the <cite>default</cite> and <cite>json_util</cite> callback functions from <cite>bson</cite></p>
+<p>Main features</p>
+<ul class="simple">
+<li>converts unicode to <cite>str</cite></li>
+<li>converts Decimal objects to <cite>str</cite> or <cite>float</cite></li>
+<li>converts datetime to <cite>str</cite></li>
+</ul>
+<dl class="method">
+<dt id="mongolier.utils.convert.Deserializer.to_string">
+<tt class="descname">to_string</tt><big>(</big><em>unicode_obj</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/convert.html#Deserializer.to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.convert.Deserializer.to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a unicode obj to a string</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-mongolier.utils.fixtures"></span><p>fixtures.py</p>
+<p>A module for creating json fixtures that can be imported into MongoDB and
+exporting fixtures from MongoDB</p>
+<dl class="class">
+<dt id="mongolier.utils.fixtures.FixtureBase">
+<em class="property">class </em><tt class="descclassname">mongolier.utils.fixtures.</tt><tt class="descname">FixtureBase</tt><big>(</big><em>connection</em>, <em>respect_id=False</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/fixtures.html#FixtureBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.fixtures.FixtureBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>FixtureBase</p>
+<p>Currently only holds the connection object</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mongolier.utils.fixtures.CreateFixture">
+<em class="property">class </em><tt class="descclassname">mongolier.utils.fixtures.</tt><tt class="descname">CreateFixture</tt><big>(</big><em>connection</em>, <em>respect_id=False</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/fixtures.html#CreateFixture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.fixtures.CreateFixture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a fixture (json file) that is a representation of a
+MongoDB collection</p>
+<p>Uses a standard style to store objects.</p>
+<p>{&#8216;objectid_3344545aa4453445&#8217;: [&#8216;foo&#8217;,&#8217;bar&#8217;]}</p>
+<p>If respect_id is set to true, it will store the key prefaced
+(like above) so that when it restores objects, it retains their id.</p>
+<dl class="method">
+<dt id="mongolier.utils.fixtures.CreateFixture.create">
+<tt class="descname">create</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mongolier/utils/fixtures.html#CreateFixture.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.fixtures.CreateFixture.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a fixture file</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mongolier.utils.fixtures.LoadFixture">
+<em class="property">class </em><tt class="descclassname">mongolier.utils.fixtures.</tt><tt class="descname">LoadFixture</tt><big>(</big><em>connection</em>, <em>respect_id=False</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/fixtures.html#LoadFixture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.fixtures.LoadFixture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a fixture (json file) into MongoDB.</p>
+<dl class="method">
+<dt id="mongolier.utils.fixtures.LoadFixture.load">
+<tt class="descname">load</tt><big>(</big><em>fixture</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/fixtures.html#LoadFixture.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.fixtures.LoadFixture.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a fixture into MongoDB</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-mongolier.views">
+<span id="views"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">views</span></tt><a class="headerlink" href="#module-mongolier.views" title="Permalink to this headline">¶</a></h3>
+<p>views.py</p>
+<p>A module that replicates django&#8217;s class based views for mongodb</p>
+<p>I am sure everyone has something like this already.
+I think PyDanny may have even built this into Django-Mongonaut.
+But I needed to have this without installing any extra stuff.
+Please enjoy version 0.0.3 of my class-based list/detail views for PyMongo.
+-Jeremy</p>
+<dl class="class">
+<dt id="mongolier.views.ListView">
+<em class="property">class </em><tt class="descclassname">mongolier.views.</tt><tt class="descname">ListView</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides a generic list view for MongoDB.</p>
+<dl class="method">
+<dt id="mongolier.views.ListView.get_list">
+<tt class="descname">get_list</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView.get_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView.get_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides a list of JSON objects from a MongoConnection class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mongolier.views.ListView.get">
+<tt class="descname">get</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides the built in get() function on the base View class.
+Gets the object and the context.
+Returns a redirect if there&#8217;s an issue with the page number.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -557,178 +609,6 @@ that output.</p>
 <dt id="mongolier.exceptions.DoesNotExist">
 <em class="property">exception </em><tt class="descclassname">mongolier.exceptions.</tt><tt class="descname">DoesNotExist</tt><a class="headerlink" href="#mongolier.exceptions.DoesNotExist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object or Value does not exist.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-mongolier.utils">
-<span id="utils"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">utils</span></tt><a class="headerlink" href="#module-mongolier.utils" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="module-mongolier.views">
-<span id="views"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">views</span></tt><a class="headerlink" href="#module-mongolier.views" title="Permalink to this headline">¶</a></h3>
-<p>views.py</p>
-<p>A module that replicates django&#8217;s class based views for mongodb</p>
-<p>I am sure everyone has something like this already.
-I think PyDanny may have even built this into Django-Mongonaut.
-But I needed to have this without installing any extra stuff.
-Please enjoy version 0.0.3 of my class-based list/detail views for PyMongo.</p>
-<blockquote>
-<div>-Jeremy</div></blockquote>
-<dl class="class">
-<dt id="mongolier.views.BaseMongoMixin">
-<em class="property">class </em><tt class="descclassname">mongolier.views.</tt><tt class="descname">BaseMongoMixin</tt><a class="reference internal" href="_modules/mongolier/views.html#BaseMongoMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.BaseMongoMixin" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.db_name">
-<tt class="descname">db_name</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.db_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.collection_name">
-<tt class="descname">collection_name</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.collection_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.query_sort">
-<tt class="descname">query_sort</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.query_sort" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.query_results">
-<tt class="descname">query_results</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.query_results" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.query_dict">
-<tt class="descname">query_dict</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.query_dict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.context_object_name">
-<tt class="descname">context_object_name</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.context_object_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.template_name">
-<tt class="descname">template_name</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.template_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.class_type">
-<tt class="descname">class_type</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.class_type" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BaseMongoMixin.auth_string">
-<tt class="descname">auth_string</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BaseMongoMixin.auth_string" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.BaseMongoMixin.get_context_data">
-<tt class="descname">get_context_data</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#BaseMongoMixin.get_context_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.BaseMongoMixin.get_context_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.BaseMongoMixin.get_template_name">
-<tt class="descname">get_template_name</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#BaseMongoMixin.get_template_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.BaseMongoMixin.get_template_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.BaseMongoMixin.render_to_response">
-<tt class="descname">render_to_response</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#BaseMongoMixin.render_to_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.BaseMongoMixin.render_to_response" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="mongolier.views.BasePaginatedMongoMixin">
-<em class="property">class </em><tt class="descclassname">mongolier.views.</tt><tt class="descname">BasePaginatedMongoMixin</tt><a class="reference internal" href="_modules/mongolier/views.html#BasePaginatedMongoMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="mongolier.views.BasePaginatedMongoMixin.pages">
-<tt class="descname">pages</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin.pages" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BasePaginatedMongoMixin.page">
-<tt class="descname">page</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin.page" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BasePaginatedMongoMixin.next_page_number">
-<tt class="descname">next_page_number</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin.next_page_number" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BasePaginatedMongoMixin.previous_page_number">
-<tt class="descname">previous_page_number</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin.previous_page_number" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BasePaginatedMongoMixin.offset">
-<tt class="descname">offset</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin.offset" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BasePaginatedMongoMixin.pagination_limit">
-<tt class="descname">pagination_limit</tt><em class="property"> = 25</em><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin.pagination_limit" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="mongolier.views.BasePaginatedMongoMixin.page_range">
-<tt class="descname">page_range</tt><em class="property"> = None</em><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin.page_range" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.BasePaginatedMongoMixin.get_context_data">
-<tt class="descname">get_context_data</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#BasePaginatedMongoMixin.get_context_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.BasePaginatedMongoMixin.get_context_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="mongolier.views.DetailView">
-<em class="property">class </em><tt class="descclassname">mongolier.views.</tt><tt class="descname">DetailView</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#DetailView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.DetailView" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="mongolier.views.DetailView.class_type">
-<tt class="descname">class_type</tt><em class="property"> = 'detail'</em><a class="headerlink" href="#mongolier.views.DetailView.class_type" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.DetailView.get_object">
-<tt class="descname">get_object</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#DetailView.get_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.DetailView.get_object" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.DetailView.get">
-<tt class="descname">get</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#DetailView.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.DetailView.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overrides the built in get() function on the base View class.
-Gets the object and the context.
-Returns a redirect if there&#8217;s an issue with the page number.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="mongolier.views.ListView">
-<em class="property">class </em><tt class="descclassname">mongolier.views.</tt><tt class="descname">ListView</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provides a generic list view for MongoDB.</p>
-<dl class="attribute">
-<dt id="mongolier.views.ListView.class_type">
-<tt class="descname">class_type</tt><em class="property"> = 'list'</em><a class="headerlink" href="#mongolier.views.ListView.class_type" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.ListView.get_list">
-<tt class="descname">get_list</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView.get_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView.get_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provides a list of JSON objects from a MongoConnection class.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.ListView.get">
-<tt class="descname">get</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overrides the built in get() function on the base View class.
-Gets the object and the context.
-Returns a redirect if there&#8217;s an issue with the page number.</p>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -790,9 +670,9 @@ Returns a redirect if there&#8217;s an issue with the page number.</p>
 <li class="toctree-l1"><a class="reference internal" href="index.html#document-Mongolier API Documentation">Mongolier API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.db"><tt class="docutils literal"><span class="pre">db</span></tt></a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.api"><tt class="docutils literal"><span class="pre">api</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.exceptions"><tt class="docutils literal"><span class="pre">exceptions</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.utils"><tt class="docutils literal"><span class="pre">utils</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.utils.convert"><tt class="docutils literal"><span class="pre">utils</span></tt></a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.views"><tt class="docutils literal"><span class="pre">views</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.exceptions"><tt class="docutils literal"><span class="pre">exceptions</span></tt></a></li>
 </ul>
 </li>
 </ul>
