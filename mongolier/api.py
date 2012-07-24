@@ -8,7 +8,10 @@ import json
 
 from django.db.models.sql.constants import LOOKUP_SEP
 from tastypie.resources import Resource, DeclarativeMetaclass
+from tastypie.utils import dict_strip_unicode_keys
 from bson.objectid import ObjectId
+from tastypie.bundle import Bundle
+
 
 
 class MongoStorageObject(dict):
@@ -134,6 +137,53 @@ class MongoResource(Resource):
             qs_filters.update(query)
             return(qs_filters)
 
+    # def full_dehydrate(self, bundle):
+    #     """
+    #     Must alter the full dehydrate behavior to not deal with fields.
+    #     """
+    #     # Dehydrate each field.
+    #     for field_name, field_object in self.fields.items():
+    #         # A touch leaky but it makes URI resolution work.
+    #         if getattr(field_object, 'dehydrated_type', None) == 'related':
+    #             field_object.api_name = self._meta.api_name
+    #             field_object.resource_name = self._meta.resource_name
+
+    #         bundle.data[field_name] = field_object.dehydrate(bundle)
+
+    #         # Check for an optional method to do further dehydration.
+    #         method = getattr(self, "dehydrate_%s" % field_name, None)
+
+    #         if method:
+    #             bundle.data[field_name] = method(bundle)
+
+    #     bundle = self.dehydrate(bundle)
+    #     return bundle
+
+    def build_bundle(self, obj=None, data=None, request=None):
+        """
+        Given either an object, a data dictionary or both, builds a ``Bundle``
+        for use throughout the ``dehydrate/hydrate`` cycle.
+
+        If no object is provided, an empty object from
+        ``Resource._meta.object_class`` is created so that attempts to access
+        ``bundle.obj`` do not fail.
+        """
+        if obj is None:
+            obj = self._meta.object_class()
+
+        else:
+            obj = self._meta.object_class(obj)
+            if '_id' in obj:
+                if isinstance(obj.get('_id'), ObjectId):
+                    obj.pk = obj['_id'].__str__()
+                else:
+                    obj.pk = obj['_id']
+
+            if data:
+                obj.update(data)
+        import pdb;pdb.set_trace()
+        return Bundle(obj=obj, data=data, request=request)
+
     def get_resource_uri(self, bundle_or_obj):
         """
         A method that returns the URI for an indvidual object. Uses the
@@ -189,14 +239,14 @@ class MongoResource(Resource):
         """
         A method to create an object
         """
-        bundle.obj = self._meta.object_class()
+        import pdb;pdb.set_trace()
 
         for key, value in kwargs.items():
             setattr(bundle.obj, key, value)
 
         bundle = self.full_hydrate(bundle)
 
-        bundle.obj.pk = self._meta.connection.save(kwargs)
+        self._meta.connection.save(bundle.data)
 
         return(bundle)
 

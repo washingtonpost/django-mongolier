@@ -6,7 +6,7 @@ A lightweight toolkit for integrating MongoDB with Django
 
 django-mongolier is a wrapper for `pymongo` that adds many of the happy django bits for using mongodb in a normal django app.
 
-You don't need any sort of special django-nosql or anything else, all you need is django >=1.31 and pymongo (and django-tastypie for the apis).
+You don't need any sort of special django-nosql or anything else, all you need is django >=1.31 and pymongo (and django-tastypie<=0.9.11 for the apis).
 
 The goal of this was to only abstract out the annoying bits (AutoReconnect exceptions, mainly) while leaving the standard
 query syntax of `pymongo` in.
