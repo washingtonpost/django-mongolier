@@ -27,7 +27,7 @@ class BaseConvert(object):
     supported_iterables = [dict, list]
 
     def __init__(self, **kwargs):
-        
+
         self.other_input = {}
 
     def decode_dict(self, input_dict):
@@ -42,13 +42,13 @@ class BaseConvert(object):
                 item = self.decode_dict(item)
 
             for evaluation_type, evaluation_behavior in self.other_input.items():
-                
+
                 if isinstance(item, evaluation_type):
-                    
+
                     item = evaluation_behavior(item)
 
             output_dict[key] = item
-        
+
         return(output_dict)
 
     def decode_list(self, input_list):
@@ -63,13 +63,13 @@ class BaseConvert(object):
                 item = self.decode_dict(item)
 
             for evaluation_type, evaluation_behavior in self.other_input.items():
-                
+
                 if isinstance(item, evaluation_type):
 
                     item = evaluation_behavior(item)
 
             output_list.append(item)
-        
+
         return(output_list)
 
     def convert(self, iterable):
@@ -87,7 +87,7 @@ class BaseConvert(object):
         else:
             raise ValueNotSupported("The type of iterable you have passed is not currently supported. \n\
                                     You passed: %s\n\
-                                    Please pass one of the following: %s " % 
+                                    Please pass one of the following: %s " %
                                     (iterable.__class__, self.supported_iterables))
 
         return(output)
@@ -117,16 +117,16 @@ class ConvertDecimal(BaseConvert):
     """
 
     def __init__(self, to_float=False):
-        
+
         self.other_input = {
             Decimal: self.decode_dec
         }
-        
+
         self.to_float = to_float
 
     def decode_dec(self, decimal_obj):
         """
-        Converts a Decimal object to a 
+        Converts a Decimal object to a
 
         """
         if self.to_float:
@@ -144,18 +144,31 @@ class Deserializer(ConvertDecimal):
 
     * converts unicode to `str`
     * converts Decimal objects to `str` or `float`
-    * converts datetime to `str`
-    
+    * converts date and datetime to `str`
+
+    Usage:
+
+    >>> from common.mongo.utils import Deserializer
+    >>> my_list = [
+    ...     Decimal('111223.22'),
+            datetime.datetime(2012, 1, 20, 4, 20, 25),
+            datetime.date(2012, 1, 20),
+            u'string',
+    ... ]
+    >>> converted_list = Deserializer().convert()
+    Out[]: converted_list = ['111223.22', '2012-1-20T4:20:25', '2012-1-20', 'string']
+
     """
 
     def __init__(self, **kwargs):
-        
+
         super(Deserializer, self).__init__(**kwargs)
 
         self.other_input = {
             unicode: self.to_string,
             Decimal: self.decode_dec,
             datetime.date: self.decode_date,
+            datetime.datetime: self.decode_datetime,
         }
 
 
@@ -167,3 +180,6 @@ class Deserializer(ConvertDecimal):
 
     def decode_date(self, date_obj):
         return(datetime.datetime.strftime(date_obj, '%Y-%m-%d'))
+
+    def decode_datetime(self, datetime_obj):
+        return(datetime.datetime.strftime(datetime_obj, '%Y-%m-%dT%H:%M:%S'))

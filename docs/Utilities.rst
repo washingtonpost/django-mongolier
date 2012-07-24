@@ -98,9 +98,6 @@ Currently converts:
 * unicode
 * decimal
 * date
-
-Coming soon:
-
 * datetime
 
 ::
