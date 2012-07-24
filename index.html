@@ -278,9 +278,6 @@ instantiation.</p>
 <li>unicode</li>
 <li>decimal</li>
 <li>date</li>
-</ul>
-<p>Coming soon:</p>
-<ul class="simple">
 <li>datetime</li>
 </ul>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mongolier.utils</span> <span class="kn">import</span> <span class="n">Deserializer</span>
@@ -511,8 +508,20 @@ of the class.</p>
 <ul class="simple">
 <li>converts unicode to <cite>str</cite></li>
 <li>converts Decimal objects to <cite>str</cite> or <cite>float</cite></li>
-<li>converts datetime to <cite>str</cite></li>
+<li>converts date and datetime to <cite>str</cite></li>
 </ul>
+<p>Usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">common.mongo.utils</span> <span class="kn">import</span> <span class="n">Deserializer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_list</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">Decimal</span><span class="p">(</span><span class="s">&#39;111223.22&#39;</span><span class="p">),</span>
+<span class="go">        datetime.datetime(2012, 1, 20, 4, 20, 25),</span>
+<span class="go">        datetime.date(2012, 1, 20),</span>
+<span class="go">        u&#39;string&#39;,</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converted_list</span> <span class="o">=</span> <span class="n">Deserializer</span><span class="p">()</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+<span class="go">Out[]: converted_list = [&#39;111223.22&#39;, &#39;2012-1-20T4:20:25&#39;, &#39;2012-1-20&#39;, &#39;string&#39;]</span>
+</pre></div>
+</div>
 <dl class="method">
 <dt id="mongolier.utils.convert.Deserializer.to_string">
 <tt class="descname">to_string</tt><big>(</big><em>unicode_obj</em><big>)</big><a class="reference internal" href="_modules/mongolier/utils/convert.html#Deserializer.to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.utils.convert.Deserializer.to_string" title="Permalink to this definition">¶</a></dt>
@@ -565,11 +574,6 @@ MongoDB collection</p>
 <span id="views"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">views</span></tt><a class="headerlink" href="#module-mongolier.views" title="Permalink to this headline">¶</a></h3>
 <p>views.py</p>
 <p>A module that replicates django&#8217;s class based views for mongodb</p>
-<p>I am sure everyone has something like this already.
-I think PyDanny may have even built this into Django-Mongonaut.
-But I needed to have this without installing any extra stuff.
-Please enjoy version 0.0.3 of my class-based list/detail views for PyMongo.
--Jeremy</p>
 <dl class="class">
 <dt id="mongolier.views.ListView">
 <em class="property">class </em><tt class="descclassname">mongolier.views.</tt><tt class="descname">ListView</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView" title="Permalink to this definition">¶</a></dt>
