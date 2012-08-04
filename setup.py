@@ -6,15 +6,26 @@ except ImportError:
 
 import mongolier
 
+try:
+    # Import meta information
+    version=mongolier.__version__
+    author=mongolier.__author__
+    license = mongolier.__license__
+    email=mongolier.__author_email__
+
+except ImportError:
+    # Prevents failing if not all libs are installed.
+    pass
+
 setup(name='django-mongolier',
-        version=mongolier.__version__,
+        version=version,
         description='A lightweight wrapper for using django with MongoDB (pymongo)',
-        author=mongolier.__author__,
-        author_email=['bartzj@washpost.com','bowersj@washpost.com'],
+        author=author,
+        author_email=email,
         url='https://github.com/wpmedia/django-mongolier',
-        packages = ['mongolier','mongolier.utils'],
-        install_requires = ['pymongo',],
-        license = mongolier.__license__,
+        packages=['mongolier','mongolier.utils'],
+        install_requires=['pymongo',],
+        license=license,
         classifiers=[
             'Environment :: Web Environment',
             'Framework :: Django',
