@@ -226,7 +226,7 @@ class MongoResource(Resource):
 
         bundle = self.full_hydrate(bundle)
 
-        self._meta.connection.save(bundle.data)
+        self._meta.connection.save(bundle.obj, safe=True)
 
         return(bundle)
 
