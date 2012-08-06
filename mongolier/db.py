@@ -84,7 +84,7 @@ class BaseConnection(object):
 
             # If user passed username and password args, give that to authenticate
             if self.username and self.password:
-                database.authenticate(self.auth[0], self.auth[1])
+                database.authenticate(self.username, self.password)
 
             # Else, look for the deprecated auth key
             elif self.auth is not None:
