@@ -184,7 +184,7 @@ class MongoResource(Resource):
             kwargs['pk'] = bundle_or_obj.obj.get('_id').__str__()
 
         try:
-            return self._build_reverse_url(url_name, kwargs=self.resource_uri_kwargs(bundle_or_obj))
+            return self._build_reverse_url(url_name, kwargs=kwargs)
         except NoReverseMatch:
             return ''
 
