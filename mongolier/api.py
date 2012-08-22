@@ -7,9 +7,10 @@ A lightweight implementation of pymongo and django-tastypie
 import json
 
 from django.db.models.sql.constants import LOOKUP_SEP
+from django.core.urlresolvers import NoReverseMatch
 from tastypie.resources import Resource, DeclarativeMetaclass
-from bson.objectid import ObjectId
 from tastypie.bundle import Bundle
+from bson.objectid import ObjectId
 
 
 class MongoStorageObject(dict):
@@ -166,7 +167,7 @@ class MongoResource(Resource):
 
         return Bundle(obj=obj, data=data, request=request)
 
-    def get_resource_uri(self, bundle_or_obj):
+    def get_resource_uri(self, bundle_or_obj=None, url_name='api_dispatch_list'):
         """
         A method that returns the URI for an indvidual object. Uses the
         ``ObjectID`` as the id in the URI
@@ -175,12 +176,17 @@ class MongoResource(Resource):
             'resource_name': self._meta.resource_name,
         }
 
-        kwargs['pk'] = bundle_or_obj.obj.get('_id').__str__()
-
         if self._meta.api_name is not None:
             kwargs['api_name'] = self._meta.api_name
 
-        return self._build_reverse_url("api_dispatch_detail", kwargs=kwargs)
+        if bundle_or_obj is not None:
+            url_name = 'api_dispatch_detail'
+            kwargs['pk'] = bundle_or_obj.obj.get('_id').__str__()
+
+        try:
+            return self._build_reverse_url(url_name, kwargs=kwargs)
+        except NoReverseMatch:
+            return ''
 
     def get_object_list(self, request):
         """
@@ -226,7 +232,7 @@ class MongoResource(Resource):
 
         bundle = self.full_hydrate(bundle)
 
-        self._meta.connection.save(bundle.data)
+        self._meta.connection.save(bundle.obj, safe=True)
 
         return(bundle)
 
