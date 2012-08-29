@@ -4,17 +4,14 @@ try:
 except ImportError:
     from distutils.core import setup
 
-try:
-    import mongolier
-    # Import meta information
-    version = mongolier.__version__
-    author = mongolier.__author__
-    license = mongolier.__license__
-    email = mongolier.__author_email__
+import mongolier
 
-except ImportError:
-    # Prevents failing if not all libs are installed.
-    pass
+# Import meta information
+version = mongolier.__version__
+author = mongolier.__author__
+license = mongolier.__license__
+email = mongolier.__author_email__
+
 
 setup(name='django-mongolier',
         version=version,

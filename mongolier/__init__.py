@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import warnings
 ##
 # django-mongolier
 ##
@@ -9,5 +9,8 @@ __author__ = 'Jason Bartz & Jeremy Bowers'
 __license__ = 'MIT'
 __author_email__ = ['bartzj@washpost.com', 'bowersj@washpost.com']
 
-from mongolier.db import MongoConnection, PersistentConnection, Connection
-from mongolier.utils.convert import ConvertDecimal
+try:
+    from mongolier.db import MongoConnection, PersistentConnection, Connection
+    from mongolier.utils.convert import ConvertDecimal
+except ImportError, e:
+    warnings.warn(e)
