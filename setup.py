@@ -4,14 +4,13 @@ try:
 except ImportError:
     from distutils.core import setup
 
-import mongolier
-
 try:
+    import mongolier
     # Import meta information
-    version=mongolier.__version__
-    author=mongolier.__author__
+    version = mongolier.__version__
+    author = mongolier.__author__
     license = mongolier.__license__
-    email=mongolier.__author_email__
+    email = mongolier.__author_email__
 
 except ImportError:
     # Prevents failing if not all libs are installed.
