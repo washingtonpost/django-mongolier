@@ -3,12 +3,9 @@ settings.py
 
 A generic settings for testing.
 """
-from mongolier import Connection, MongoConnection
+from mongolier import Connection
 
-# MONGO_TEST_CONN = Connection(db='test', collection='test')
-
-MONGO_TEST_DB = MongoConnection(db='test', collection='test')
-MONGO_TEST_CONN = MONGO_TEST_DB.connect()
+MONGO_TEST_CONN = Connection(db='test', collection='mongolier')
 
 DATABASE_ENGINE = 'sqlite3'
 DATABASE_NAME = 'mongolier.sqlite'
