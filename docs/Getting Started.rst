@@ -6,8 +6,8 @@ Make a connection
 
 ::
 
-    from mongolier import PersistentConnection
-    my_connection_object = MongoConnection(database='face', collection='palm', auth='username:pass')
+    from mongolier import Connection
+    my_connection_object = Connection(database='face', collection='palm', auth='username:pass')
 
 Query
 -----
