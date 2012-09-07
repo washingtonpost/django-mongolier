@@ -19,12 +19,10 @@ query syntax of `pymongo` in.
 * utils - a series of classes to filter python objects so they can be inserted into mongo
 * fixture creation and database 'syncing' via standard Django management commands
 
-## RoadMap
+## RoadMap (v 0.3.0)
 
-* better error handling
-* TASTYPIE: Support for standard query parameters in URL
-* tests (super duh)
-
+* improved views, with more facets and mixins
+* improved management commands
 
 ## Getting started
 
