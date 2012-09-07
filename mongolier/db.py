@@ -7,13 +7,20 @@ import time
 import pymongo
 from pymongo.errors import AutoReconnect, ConnectionFailure, OperationFailure
 from gridfs import GridFS
-from mongolier.exceptions import IncorrectParameters
 from warnings import warn
 
 
 class BaseConnection(object):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+                host='localhost',
+                port=27017,
+                db='test',
+                collection='test',
+                username=None,
+                password=None,
+                max_retries=2,
+                **options):
         """
         Instantiate the Mongo class
 
@@ -21,50 +28,30 @@ class BaseConnection(object):
             connect to the right database
 
         """
-        self.args = args
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
         #: The port that the MongoDB connection lives on
-        if not kwargs.get('port'):
-            self.port = 27017
+        self.port = port
 
         #: The host or IP address to connect to
-        if not kwargs.get('host'):
-            self.host = 'localhost'
+        self.host = host
 
         #: The name of the database
-        if not kwargs.get('db'):
-            self.db = 'test_db'
+        self.db = db
 
         #: The name of the collection
-        if not kwargs.get('collection'):
-            self.collection = 'test_col'
-
-        #: DEPRECATED: Auth parameters `username:password`
-        if not kwargs.get('auth'):
-            self.auth = None
+        self.collection = collection
 
         #: The database username
-        if not kwargs.get('username'):
-            self.username = None
+        self.username = username
 
         #: The database password
-        if not kwargs.get('password'):
-            self.password = None
+        self.password = password
 
         #: The number of retries to attempt to reconnect after a connection
-        # is dropped.
-        if not kwargs.get('retries'):
-            self.max_retries = 2
+        #: is dropped.
+        self.max_retries = max_retries
 
-        deprecated = ['auth']
-
-        # Check for deprecated kwargs, and warn accordingly
-        for kwarg in deprecated:
-            if kwarg in kwargs:
-                warn('%s is deprecated and will be removed in v 0.2.0' % kwarg, DeprecationWarning)
+        # Additional options
+        self.options = options
 
     def _connect_to_db(self, retries=0):
         """
@@ -77,7 +64,7 @@ class BaseConnection(object):
 
         try:
             # Establish a Connection
-            connection = pymongo.Connection(self.host, self.port)
+            connection = pymongo.Connection(self.host, self.port, **self.options)
 
             # Establish a database
             database = connection[self.db]
@@ -85,19 +72,6 @@ class BaseConnection(object):
             # If user passed username and password args, give that to authenticate
             if self.username and self.password:
                 database.authenticate(self.username, self.password)
-
-            # Else, look for the deprecated auth key
-            elif self.auth is not None:
-                try:
-                    self.auth = self.auth.split(':')
-
-                # If self.auth is already a list, just pass
-                except AttributeError:
-                    pass
-                if len(self.auth) != 2:
-                    raise IncorrectParameters('Incorrect auth params, you passed %s' % self.auth)
-
-                database.authenticate(self.auth[0], self.auth[1])
 
         # Handle the following exceptions, if retries is less than what is
         # passed into this method, attempt to connect again.  Otherwise,
@@ -145,12 +119,6 @@ class BaseConnection(object):
         return grid
 
 
-class MongoConnection(BaseConnection):
-    """
-    Alias for BaseConnection so we don't break backwards compatibility.
-    """
-
-
 class Connection(BaseConnection):
     """
     A wrapper for MongoConnection that stores a persistent set of connection information
@@ -189,7 +157,33 @@ class Connection(BaseConnection):
         return(self.gridfs())
 
 
+class MongoConnection(BaseConnection):
+    """
+    Alias for BaseConnection so we don't break backwards compatibility.
+    """
+    def __init__(self,
+                host='localhost',
+                port=27017,
+                db='test',
+                collection='test',
+                username=None,
+                password=None,
+                max_retries=2,
+                **options):
+        warn("The MongoConnection class has been deprecated and will be removed in v 0.3.0")
+
+
 class PersistentConnection(Connection):
     """
     Alias for Connection so we don't break backwards compatibility.
     """
+    def __init__(self,
+                host='localhost',
+                port=27017,
+                db='test',
+                collection='test',
+                username=None,
+                password=None,
+                max_retries=2,
+                **options):
+        warn("The PersistentConnection class has been deprecated and will be removed in v 0.3.0")

@@ -6,9 +6,9 @@ A harness for testing API features
 import json
 from django.test.client import Client, FakePayload, MULTIPART_CONTENT
 from django.test import TestCase
-from mongolier import Connection
 from warnings import warn
 from urlparse import urlparse
+from django.db import settings
 
 
 class TestClient(Client):
@@ -74,11 +74,9 @@ class TestAPI(TestCase):
         patch_response = self.client.patch('/api/test/mongo/?format=json',
             json.dumps(mongolier_test_object),
             content_type='application/json')
-        import pdb;pdb.set_trace()
 
         # Destroy data
-        connection = Connection(db='test', collection='test')
-        connection.api.remove({'mongolier-api-test': 1})
+        settings.MONGO_TEST_CONN.api.remove({'mongolier-api-test': 1})
 
     def test_list(self):
         """

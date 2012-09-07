@@ -49,3 +49,29 @@ my_mongo_cursor = mongo.find( {'query_key': query_value} )
 ```
 
 Check out the [API docs](http://wpmedia.github.com/django-mongolier "API documentation") for a more detailed README
+
+
+## Changelog
+
+## 0.2.0
+
+### Backwards incompatible changes
+
+* [deprecated and removed] auth kwarg inside MongoConnection/Connection objects
+* [deprecated and removed] support for MongoConnection objects inside api.py
+* [deprecated] MongoConnection and PersistentConnection Aliases (will be removed in 0.3.0)
+
+### Features
+
+* [db.py] Added support for additional kwargs to Connection object (for passing things like ``tags_set`` and ``read_preference``)
+* [api.py] Added additional query style: ability to pass JSON objects into individual params
+* [tests] Added working django test app
+
+### Bugfixes
+
+* [api.py] Corrected CREATE/UPDATE methods
+
+
+## Pre 0.2.0
+
+Early development, lots of changes too numerous to list here
