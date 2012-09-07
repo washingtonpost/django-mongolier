@@ -51,8 +51,8 @@
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="make-a-connection">
 <h3>Make a connection<a class="headerlink" href="#make-a-connection" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mongolier</span> <span class="kn">import</span> <span class="n">PersistentConnection</span>
-<span class="n">my_connection_object</span> <span class="o">=</span> <span class="n">MongoConnection</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s">&#39;face&#39;</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="s">&#39;palm&#39;</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="s">&#39;username:pass&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">mongolier</span> <span class="kn">import</span> <span class="n">Connection</span>
+<span class="n">my_connection_object</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s">&#39;face&#39;</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="s">&#39;palm&#39;</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="s">&#39;username:pass&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -137,7 +137,6 @@ is supported</p>
 implementation</p>
 <ul class="simple">
 <li>Sorting</li>
-<li>Filtering based</li>
 </ul>
 <div class="section" id="setup">
 <h3>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h3>
@@ -327,7 +326,7 @@ conversion functionality.</p>
 <span id="db"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">db</span></tt><a class="headerlink" href="#module-mongolier.db" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="mongolier.db.Connection">
-<em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">Connection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mongolier.db.Connection" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">mongolier.db.</tt><tt class="descname">Connection</tt><big>(</big><em>host='localhost'</em>, <em>port=27017</em>, <em>db='test'</em>, <em>collection='test'</em>, <em>username=None</em>, <em>password=None</em>, <em>max_retries=2</em>, <em>**options</em><big>)</big><a class="headerlink" href="#mongolier.db.Connection" title="Permalink to this definition">¶</a></dt>
 <dd><p>A wrapper for MongoConnection that stores a persistent set of connection information</p>
 <p>Import PersistentConnection from mongolier, and pass in the proper kwargs.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">my_connection</span> <span class="o">=</span> <span class="n">PersistentConnection</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
@@ -380,26 +379,54 @@ through tastypie&#8217;s methods.</p>
 <dl class="method">
 <dt id="mongolier.api.MongoResource.filter_query_to_mongo">
 <tt class="descname">filter_query_to_mongo</tt><big>(</big><em>value</em>, <em>field_name</em>, <em>filters</em>, <em>filter_expr</em>, <em>filter_type</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.filter_query_to_mongo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Turn the string <tt class="docutils literal"><span class="pre">value</span></tt> into a python object.</p>
+<dd><p>Turn the string <tt class="docutils literal"><span class="pre">value</span></tt> into a python-mongo object.</p>
+<p>In order to filter in MongoDB, one must pass a dictionary with a modifier,
+this is basically an exact representation of the Javascript objects
+that MongoDB uses internally.</p>
+<p>For example, an <tt class="docutils literal"><span class="pre">in</span></tt> query would look like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">filter_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;my_field&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;$in&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;list&quot;</span><span class="p">,</span><span class="s">&quot;of&quot;</span><span class="p">,</span><span class="s">&quot;values&quot;</span><span class="p">]}}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="mongolier.api.MongoResource.get_query_bits_from_dict">
+<tt class="descname">get_query_bits_from_dict</tt><big>(</big><em>dictionary</em>, <em>keys_list=</em><span class="optional">[</span><span class="optional">]</span>, <em>value=None</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.get_query_bits_from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>A special method that examines dictionaries and extracts keys and values.</p>
+<p><tt class="docutils literal"><span class="pre">keys_list</span></tt> and <tt class="docutils literal"><span class="pre">value</span></tt> are required for the <tt class="docutils literal"><span class="pre">filter_bits</span></tt> list,
+and <tt class="docutils literal"><span class="pre">value</span></tt>, respectively, in  in <tt class="docutils literal"><span class="pre">::meth::&lt;build_filters&gt;</span> <span class="pre">build_filters</span></tt>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.build_filters">
 <tt class="descname">build_filters</tt><big>(</big><em>filters=None</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.build_filters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deconstructs a GET request to create filter params</p>
+<p>Queries with mongolier accept three different types of patterns:</p>
+<ul class="simple">
+<li>standard django double underbar (__)</li>
+<li>a single JSON object, passed with the <tt class="docutils literal"><span class="pre">query</span></tt> parameter</li>
+<li>a JSON object attached to a parameter, which represents a field</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="mongolier.api.MongoResource.build_bundle">
+<tt class="descname">build_bundle</tt><big>(</big><em>obj=None</em>, <em>data=None</em>, <em>request=None</em><big>)</big><a class="headerlink" href="#mongolier.api.MongoResource.build_bundle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given either an object, a data dictionary or both, builds a <tt class="docutils literal"><span class="pre">Bundle</span></tt>
+for use throughout the <tt class="docutils literal"><span class="pre">dehydrate/hydrate</span></tt> cycle.</p>
+<p>If no object is provided, an empty object from
+<tt class="docutils literal"><span class="pre">Resource._meta.object_class</span></tt> is created so that attempts to access
+<tt class="docutils literal"><span class="pre">bundle.obj</span></tt> do not fail.</p>
+<p>In order to maintain consistency between Django and MongoDB documents,
+it turns the obj&#8217;s &#8216;_id&#8217; value into a pk, and adds it as a property
+on the obj.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mongolier.api.MongoResource.get_resource_uri">
-<tt class="descname">get_resource_uri</tt><big>(</big><em>bundle_or_obj</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.get_resource_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.get_resource_uri" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_resource_uri</tt><big>(</big><em>bundle_or_obj=None</em>, <em>url_name='api_dispatch_list'</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.get_resource_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.get_resource_uri" title="Permalink to this definition">¶</a></dt>
 <dd><p>A method that returns the URI for an indvidual object. Uses the
 <tt class="docutils literal"><span class="pre">ObjectID</span></tt> as the id in the URI</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="mongolier.api.MongoResource.get_object_list">
-<tt class="descname">get_object_list</tt><big>(</big><em>request</em><big>)</big><a class="reference internal" href="_modules/mongolier/api.html#MongoResource.get_object_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.api.MongoResource.get_object_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>A method to return a list of objects.</p>
 </dd></dl>
 
 <dl class="method">
@@ -570,30 +597,8 @@ MongoDB collection</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mongolier.views">
-<span id="views"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">views</span></tt><a class="headerlink" href="#module-mongolier.views" title="Permalink to this headline">¶</a></h3>
-<p>views.py</p>
-<p>A module that replicates django&#8217;s class based views for mongodb</p>
-<dl class="class">
-<dt id="mongolier.views.ListView">
-<em class="property">class </em><tt class="descclassname">mongolier.views.</tt><tt class="descname">ListView</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provides a generic list view for MongoDB.</p>
-<dl class="method">
-<dt id="mongolier.views.ListView.get_list">
-<tt class="descname">get_list</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView.get_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView.get_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provides a list of JSON objects from a MongoConnection class.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="mongolier.views.ListView.get">
-<tt class="descname">get</tt><big>(</big><em>request</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/mongolier/views.html#ListView.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mongolier.views.ListView.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overrides the built in get() function on the base View class.
-Gets the object and the context.
-Returns a redirect if there&#8217;s an issue with the page number.</p>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="views">
+<h3><tt class="xref py py-mod docutils literal"><span class="pre">views</span></tt><a class="headerlink" href="#views" title="Permalink to this headline">¶</a></h3>
 </div>
 <div class="section" id="module-mongolier.exceptions">
 <span id="exceptions"></span><h3><tt class="xref py py-mod docutils literal"><span class="pre">exceptions</span></tt><a class="headerlink" href="#module-mongolier.exceptions" title="Permalink to this headline">¶</a></h3>
@@ -675,7 +680,7 @@ Returns a redirect if there&#8217;s an issue with the page number.</p>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.db"><tt class="docutils literal"><span class="pre">db</span></tt></a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.api"><tt class="docutils literal"><span class="pre">api</span></tt></a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.utils.convert"><tt class="docutils literal"><span class="pre">utils</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.views"><tt class="docutils literal"><span class="pre">views</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#views"><tt class="docutils literal"><span class="pre">views</span></tt></a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#module-mongolier.exceptions"><tt class="docutils literal"><span class="pre">exceptions</span></tt></a></li>
 </ul>
 </li>
