@@ -11,8 +11,8 @@ MONGO_TEST_DB = MongoConnection(db='test', collection='test')
 MONGO_TEST_CONN = MONGO_TEST_DB.connect()
 
 DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = 'mongolier.db'
-TEST_DATABASE_NAME = 'mongolier-test.db'
+DATABASE_NAME = 'mongolier.sqlite'
+TEST_DATABASE_NAME = 'mongolier-test.sqlite'
 
 # for forwards compatibility
 DATABASES = {
