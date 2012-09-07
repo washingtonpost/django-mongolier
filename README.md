@@ -46,7 +46,7 @@ my_mongo_cursor = mongo.find( {'query_key': query_value} )
 
 ```
 
-Check out the [API docs](http://wpmedia.github.com/django-mongolier "API documentation") for a more detailed README
+Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API documentation") for a more detailed README
 
 
 ## Changelog
