@@ -155,35 +155,3 @@ class Connection(BaseConnection):
     @property
     def fs(self):
         return(self.gridfs())
-
-
-class MongoConnection(BaseConnection):
-    """
-    Alias for BaseConnection so we don't break backwards compatibility.
-    """
-    def __init__(self,
-                host='localhost',
-                port=27017,
-                db='test',
-                collection='test',
-                username=None,
-                password=None,
-                max_retries=2,
-                **options):
-        warn("The MongoConnection class has been deprecated and will be removed in v 0.3.0")
-
-
-class PersistentConnection(Connection):
-    """
-    Alias for Connection so we don't break backwards compatibility.
-    """
-    def __init__(self,
-                host='localhost',
-                port=27017,
-                db='test',
-                collection='test',
-                username=None,
-                password=None,
-                max_retries=2,
-                **options):
-        warn("The PersistentConnection class has been deprecated and will be removed in v 0.3.0")
