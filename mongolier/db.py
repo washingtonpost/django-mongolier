@@ -11,7 +11,9 @@ from warnings import warn
 
 
 class BaseConnection(object):
-
+    """
+    The base methods used for all connection objects
+    """
     def __init__(self,
                 host='localhost',
                 port=27017,
@@ -127,11 +129,12 @@ class Connection(BaseConnection):
 
     ::
 
-        my_connection = PersistentConnection(**{
+        my_connection = Connection(**{
             "database": "my_db",
             "collection": "my_collection",
             "port": 27017,
-            "auth": "my_login:my_pass",
+            "username": "my_login"
+            "password": "my_pass",
             "retries": 5,
         })
 
