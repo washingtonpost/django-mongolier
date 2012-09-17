@@ -55,7 +55,8 @@ Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API 
 
 ### Backwards incompatible changes
 
-* [db.py | removed] MongoConnection and PersistenConnection Aliases
+* [db.py | removed] MongoConnection and PersistentConnection Aliases
+* [views.py | deprecated and removed] Nonstandard connection object, replaced with single object from db.py
 
 ## 0.2.0
 
