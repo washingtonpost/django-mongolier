@@ -18,7 +18,6 @@ The following features are unsupported, but are on the roadmap for future
 implementation
 
 * Sorting
-* Filtering based
 
 Setup
 -----

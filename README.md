@@ -46,18 +46,24 @@ my_mongo_cursor = mongo.find( {'query_key': query_value} )
 
 ```
 
-Check out the [API docs](http://wpmedia.github.com/django-mongolier "API documentation") for a more detailed README
+Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API documentation") for a more detailed README
 
 
-## Changelog
+# Changelog
+
+## 0.3.0
+
+### Backwards incompatible changes
+
+* [db.py | removed] MongoConnection and PersistenConnection Aliases
 
 ## 0.2.0
 
 ### Backwards incompatible changes
 
-* [deprecated and removed] auth kwarg inside MongoConnection/Connection objects
-* [deprecated and removed] support for MongoConnection objects inside api.py
-* [deprecated] MongoConnection and PersistentConnection Aliases (will be removed in 0.3.0)
+* [db.py | deprecated and removed] auth kwarg inside MongoConnection/Connection objects
+* [api.py | deprecated and removed] support for MongoConnection objects inside api.py
+* [db.py | deprecated] MongoConnection and PersistentConnection Aliases (will be removed in 0.3.0)
 
 ### Features
 
