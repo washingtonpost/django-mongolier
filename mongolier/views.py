@@ -14,7 +14,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
 
 from bson.objectid import ObjectId
-from mongolier import MongoConnection
+from mongolier.db import MongoConnection
 
 
 class BaseMongoMixin(object):

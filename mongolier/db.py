@@ -170,6 +170,8 @@ class MongoConnection(BaseConnection):
                 password=None,
                 max_retries=2,
                 **options):
+        super(MongoConnection, self).__init__(host, port, db, collection, username,
+            password, max_retries, **options)
         warn("The MongoConnection class has been deprecated and will be removed in v 0.3.0")
 
 
@@ -186,4 +188,7 @@ class PersistentConnection(Connection):
                 password=None,
                 max_retries=2,
                 **options):
+        super(PersistentConnection, self).__init__(host, port, db, collection, username,
+            password, max_retries, **options)
+
         warn("The PersistentConnection class has been deprecated and will be removed in v 0.3.0")
