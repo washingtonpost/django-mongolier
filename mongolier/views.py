@@ -105,6 +105,65 @@ class DetailView(BaseMongoMixin, View):
             return HttpResponseRedirect(self.get_object()[0])
 
 
+class PagelessListView(BaseMongoMixin, View):
+
+    class_type = 'list'
+
+    def get_list(self, *args, **kwargs):
+        """
+        Provides a list of JSON objects from a MongoConnection class.
+        """
+        if self.query:
+            kwargs.update(self.query)
+        # Get the total count and the number of pages.
+        obj_query = self.connection.api.find(kwargs, fields=self.fields, sort=self.sort)
+
+        query_list = []
+
+        # Append each item to the query_list.
+        for item in obj_query:
+            item_dict = {}
+            item_as_kwargs = dict(item)
+            item_dict.update(**item_as_kwargs)
+            item_dict['id'] = str(item['_id'])
+            item_dict.pop('_id')
+            query_list.append(item_dict)
+        print query_list
+        # Return the query list, and set the type of return to query.
+        return query_list, 'query'
+
+    def get(self, request, *args, **kwargs):
+        """
+        Overrides the built in get() function on the base View class.
+        Gets the object and the context.
+        Returns a redirect if there's an issue with the page number.
+        """
+
+        # If the type of response is a query:
+        if self.get_list()[1] == 'query':
+
+            # Set the results to the first part of the tuple.
+            self.results = self.get_list(*args, **kwargs)[0]
+
+            # If there are no results ...
+            if len(self.results) == 0:
+
+                #... raise a 404.
+                raise Http404(u"List is empty.")
+
+            # If there are results, set the context data.
+            context = self.get_context_data(**kwargs)
+
+            # Return render_to_response with the context data.
+            return self.render_to_response(context)
+
+        # Otherwise, if the response is a redirect ...
+        elif self.get_list()[1] == 'redirect':
+
+            #... execute the redirect.
+            return HttpResponseRedirect(self.get_list()[0])
+
+
 class ListView(BasePaginatedMongoMixin, View):
     """
     Provides a generic list view for MongoDB.
