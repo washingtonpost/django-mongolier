@@ -108,6 +108,7 @@ class DetailView(BaseMongoMixin, View):
 class PagelessListView(BaseMongoMixin, View):
 
     class_type = 'list'
+    show_id = False
 
     def get_list(self, *args, **kwargs):
         """
@@ -116,7 +117,7 @@ class PagelessListView(BaseMongoMixin, View):
         if self.query:
             kwargs.update(self.query)
         # Get the total count and the number of pages.
-        obj_query = self.connection.api.find(kwargs, fields=self.fields, sort=self.sort)
+        obj_query = self.connection.api.find(kwargs, sort=self.sort)
 
         query_list = []
 
@@ -125,10 +126,10 @@ class PagelessListView(BaseMongoMixin, View):
             item_dict = {}
             item_as_kwargs = dict(item)
             item_dict.update(**item_as_kwargs)
-            item_dict['id'] = str(item['_id'])
+            if self.show_id:
+                item_dict['id'] = str(item['_id'])
             item_dict.pop('_id')
             query_list.append(item_dict)
-        print query_list
         # Return the query list, and set the type of return to query.
         return query_list, 'query'
 
