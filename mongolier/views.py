@@ -84,7 +84,7 @@ class DetailView(BaseMongoMixin, View):
         if self.get_object()[1] == 'query':
 
             # Set the results to the first part of the tuple.
-            self.results = self.get_object()[0]
+            self.results = self.get_object(*args, **kwargs)[0]
 
             # If there are no results ...
             if not self.results:

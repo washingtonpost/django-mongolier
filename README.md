@@ -58,6 +58,10 @@ Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API 
 * [db.py | removed] MongoConnection and PersistentConnection Aliases
 * [views.py | deprecated and removed] Nonstandard connection object, replaced with single object from db.py
 
+### Bugfixes ###
+
+* [views.py] Query parameters in url actually work now
+
 ## 0.2.0
 
 ### Backwards incompatible changes
