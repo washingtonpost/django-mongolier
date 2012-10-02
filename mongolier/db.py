@@ -5,7 +5,10 @@ A class for connecting to a MongoDB instance
 """
 import time
 import pymongo
-from pymongo.errors import AutoReconnect, ConnectionFailure, OperationFailure
+from pymongo.errors import (AutoReconnect,
+                            ConnectionFailure,
+                            OperationFailure,
+                            InvalidMode)
 from gridfs import GridFS
 from warnings import warn
 
@@ -100,20 +103,36 @@ class BaseConnection(object):
 
         return database
 
-    def connect(self):
+    def _check_mode(self, mode):
+        """
+        Check mode is a failsafe designed to prevent bad operations from happening.
+
+        Because pymongo (and MongoDB) can be finnicky when using a standard query
+        to access a gridfs collection and visa versa, we put in a check that once
+        a connection is made, it can only be that type of connection.
+        """
+        if mode is not self._mode:
+            raise InvalidMode(".The mode set does not match the mode requested. \n\
+                                This connection object already used %s" % mode)
+
+    def _connect(self):
         """
         Connect to the mongo instance
         """
+        self._check_mode('api')
+
         database = self._connect_to_db()
 
         collection = database[self.collection]
 
         return collection
 
-    def gridfs(self):
+    def _gridfs(self):
         """
         A module to connect to GridFS and chunk large files for saving into mongo
         """
+        self._check_mode('gridfs')
+
         database = self._connect_to_db()
 
         grid = GridFS(database, collection=self.collection)
@@ -153,11 +172,13 @@ class Connection(BaseConnection):
 
     @property
     def api(self):
-        return(self.connect())
+        self._mode = 'api'
+        return(self._connect())
 
     @property
     def fs(self):
-        return(self.gridfs())
+        self._mode = 'gridfs'
+        return(self._gridfs())
 
 
 class MongoConnection(BaseConnection):
