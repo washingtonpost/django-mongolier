@@ -13,4 +13,4 @@ try:
     from mongolier.db import Connection, MongoConnection
     from mongolier.utils.convert import ConvertDecimal
 except ImportError, e:
-    warnings.warn(e)
+    warnings.warn(str(e))
