@@ -7,8 +7,8 @@ import time
 import pymongo
 from pymongo.errors import (AutoReconnect,
                             ConnectionFailure,
-                            OperationFailure,
-                            InvalidMode)
+                            OperationFailure)
+from mongolier.exceptions import InvalidMode
 from gridfs import GridFS
 
 
