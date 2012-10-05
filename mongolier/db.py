@@ -10,7 +10,6 @@ from pymongo.errors import (AutoReconnect,
                             OperationFailure,
                             InvalidMode)
 from gridfs import GridFS
-from warnings import warn
 
 
 class BaseConnection(object):
@@ -179,40 +178,3 @@ class Connection(BaseConnection):
     def fs(self):
         self._mode = 'gridfs'
         return(self._gridfs())
-
-
-class MongoConnection(BaseConnection):
-    """
-    Alias for BaseConnection so we don't break backwards compatibility.
-    """
-    def __init__(self,
-                host='localhost',
-                port=27017,
-                db='test',
-                collection='test',
-                username=None,
-                password=None,
-                max_retries=2,
-                **options):
-        super(MongoConnection, self).__init__(host, port, db, collection, username,
-            password, max_retries, **options)
-        warn("The MongoConnection class has been deprecated and will be removed in v 0.3.0")
-
-
-class PersistentConnection(Connection):
-    """
-    Alias for Connection so we don't break backwards compatibility.
-    """
-    def __init__(self,
-                host='localhost',
-                port=27017,
-                db='test',
-                collection='test',
-                username=None,
-                password=None,
-                max_retries=2,
-                **options):
-        super(PersistentConnection, self).__init__(host, port, db, collection, username,
-            password, max_retries, **options)
-
-        warn("The PersistentConnection class has been deprecated and will be removed in v 0.3.0")

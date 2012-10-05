@@ -57,10 +57,19 @@ Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API 
 
 * [db.py | removed] MongoConnection and PersistentConnection Aliases
 * [views.py | deprecated and removed] Nonstandard connection object, replaced with single object from db.py
+* [views.py | deprecated and removed] Strange parameter names, replaced with simpler names
 
 ### Bugfixes ###
 
 * [views.py] Query parameters in url actually work now
+* [api.py] Added ``key`` to ignored query parameters.
+* [db.py] Fixed Connection object to reject other connection types after one has already been established. There is a pymongo bug where if you add a normal document to a gridfs collection, you can damage that collection.
+
+
+### Features  ###
+
+* [views.py] Added ``PagelessListView``
+* [views.py] Vastly improved the views
 
 ## 0.2.0
 

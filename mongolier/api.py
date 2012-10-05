@@ -55,7 +55,7 @@ class MongoResource(Resource):
     """
     __metaclass__ = MongoDeclarativeMetaclass
 
-    invalid_filter_types = ['format', 'callback', 'limit', 'offset']
+    invalid_filter_types = ['format', 'callback', 'limit', 'offset', 'key']
 
     query_terms = ['all',
                    'exists',
