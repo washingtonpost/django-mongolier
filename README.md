@@ -19,10 +19,14 @@ query syntax of `pymongo` in.
 * utils - a series of classes to filter python objects so they can be inserted into mongo
 * fixture creation and database 'syncing' via standard Django management commands
 
-## RoadMap (v 0.3.0)
+## RoadMap (v 0.4.0)
+
+v 0.4.0 will hopefully be the final pre-production version. I expect to move to 1.0 soon.
 
 * improved views, with more facets and mixins
 * improved management commands
+* full test suite
+* full documentation
 
 ## Getting started
 
@@ -69,7 +73,7 @@ Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API 
 ### Features  ###
 
 * [views.py] Added ``PagelessListView``
-* [views.py] Vastly improved the views
+* [views.py] Vastly improved the views in preparation for v0.4.0
 
 ## 0.2.0
 
