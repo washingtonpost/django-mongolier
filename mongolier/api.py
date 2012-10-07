@@ -183,10 +183,9 @@ class MongoResource(Resource):
 
         # Otherwise, construct a query from the parameters passed.
         # First, remove reserved filter keywords
-        try:
-            [filters.pop(filter_type) for filter_type in self.invalid_filter_types]
-        except KeyError:
-            pass
+        for filter_type in self.invalid_filter_types:
+            if filter_type in filters:
+                filters.pop(filter)
 
         # Create a blank dictionary to store a filter dictionary
         qs_filters = {}
