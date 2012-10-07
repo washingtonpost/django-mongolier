@@ -185,7 +185,7 @@ class MongoResource(Resource):
         # First, remove reserved filter keywords
         for filter_type in self.invalid_filter_types:
             if filter_type in filters:
-                filters.pop(filter)
+                filters.pop(filter_type)
 
         # Create a blank dictionary to store a filter dictionary
         qs_filters = {}
