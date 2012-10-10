@@ -8,7 +8,7 @@ import pymongo
 from pymongo.errors import (AutoReconnect,
                             ConnectionFailure,
                             OperationFailure)
-from mongolier.exceptions import InvalidMode
+from mongolier.exceptions import InvalidMode, DoesNotExist
 from gridfs import GridFS
 
 
@@ -24,6 +24,7 @@ class BaseConnection(object):
                 username=None,
                 password=None,
                 max_retries=2,
+                override=False,
                 **options):
         """
         Instantiate the Mongo class
@@ -54,8 +55,74 @@ class BaseConnection(object):
         #: is dropped.
         self.max_retries = max_retries
 
-        # Additional options
+        #: Additional options to pass into the pymongo connection
         self.options = options
+
+        #: Determines whether to permanently override default collection object
+        #: on generic connections
+        self.override = override
+
+        # To prevent incidental recursion
+        self._mode = None
+
+    def __getattribute__(self, attribute):
+        """
+        Custom attribute override to allow a db connection to support multiple connections.
+
+        This is basically replicating the feature of a standard pymongo collection object,
+        except with the added benefit of mongolier's options and truncated syntax.
+
+        To use, just pass a collection as an attribute to a mongolier Connection obj
+
+        ::
+
+            my_connection_obj = Connection(db='my_db')
+            my_connection_obj.my_collection.find_one()
+
+        This will override any collection passed into the instantiation of the class,
+        but only for that method call.  It does not override the Connection's collection
+        attribute.
+
+        Note: You cannot name a collection the same as an attribute on the Connection
+        object. If you do that, use item access instead.
+
+        """
+        try:
+            return(super(BaseConnection, self).__getattribute__(attribute))
+        except AttributeError:
+            return(self._generic_connection(attribute))
+
+    def __getitem__(self, item):
+        """
+        Same purpose as ``<meth::__getattribute__>__getattribute__``, except via
+        item indexing.
+
+        ::
+
+            my_connection_obj = Connection(db='my_db')
+            my_connection_obj['my_collection'].find_one()
+
+        is the same as:
+
+        ::
+
+            my_connection_obj = Connection(db='my_db', collection='my_collection')
+            my_connection_obj.api.find_one()
+
+
+        """
+        return(self._generic_connection(item))
+
+    def _generic_connection(self, collection):
+        """
+        A method to handle generic connections created via __getattribute__ and
+        __getitem__.
+        """
+        self._mode = 'api'
+        if self.override:
+            self.collection = collection
+
+        return(self._connect(collection=collection))
 
     def _connect_to_db(self, retries=0):
         """
@@ -110,11 +177,14 @@ class BaseConnection(object):
         to access a gridfs collection and visa versa, we put in a check that once
         a connection is made, it can only be that type of connection.
         """
+        if not self._mode:
+            raise DoesNotExist("The mode does not exist, most likely because this\
+                                was subclassed improperly.")
         if mode is not self._mode:
             raise InvalidMode(".The mode set does not match the mode requested. \n\
                                 This connection object already used %s" % mode)
 
-    def _connect(self):
+    def _connect(self, collection=None):
         """
         Connect to the mongo instance
         """
@@ -122,7 +192,10 @@ class BaseConnection(object):
 
         database = self._connect_to_db()
 
-        collection = database[self.collection]
+        if not collection:
+            collection = self.collection
+
+        collection = database[collection]
 
         return collection
 

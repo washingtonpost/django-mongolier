@@ -27,6 +27,9 @@ class TestConnection(unittest.TestCase):
         # Destroy test data
         connection.api.remove({'mongolier-test': 1})
 
+        # Test for __getattribute__ and __getitem__
+        raise Exception("write __getattribute__ and __getitem__ test")
+
 
 class TestGrid(unittest.TestCase):
     """
