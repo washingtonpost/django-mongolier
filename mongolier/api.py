@@ -20,8 +20,6 @@ class MongoStorageObject(dict):
     through tastypie's methods.
 
     """
-    pk = None
-
     def __getattr__(self, name):
         return self.get(name, None)
 
@@ -55,7 +53,12 @@ class MongoResource(Resource):
     """
     __metaclass__ = MongoDeclarativeMetaclass
 
-    invalid_filter_types = ['format', 'callback', 'limit', 'offset', 'key']
+    invalid_filter_types = ['format',
+                            'callback',
+                            'limit',
+                            'offset',
+                            'key',
+                            'sort']
 
     query_terms = ['all',
                    'exists',
@@ -64,7 +67,11 @@ class MongoResource(Resource):
                    'in',
                    'nin',
                    'size',
-                   'type']
+                   'type',
+                   'gt',
+                   'gte',
+                   'lt',
+                   'lte']
 
     query_terms_list_input = ['in', 'nin']
     unsupported_query_terms = ['and', 'or', 'nor']
@@ -73,14 +80,47 @@ class MongoResource(Resource):
         connection = None
 
     def apply_filters(self, request, applicable_filters):
+        """
+        Final method that applies the filters built in ``build_filters``
+        and adds sorting if it's available
+        """
+        sorting = self.get_sorting(request)
+        if not sorting:
+            mongo_list_cursor = self._meta.connection.api\
+                                    .find(applicable_filters)
+        else:
+            print sorting
+            mongo_list_cursor = self._meta.connection.api\
+                                    .find(applicable_filters)\
+                                    .sort(sorting)
 
-        mongo_list_cursor = self._meta.connection.api.find(applicable_filters)
         results = []
-
         for mongo_obj in mongo_list_cursor:
             results.append(mongo_obj)
 
         return(results)
+
+    def get_sorting(self, request):
+        """
+        Gets the sort parameter from the request, and returns a valid Mongo sort
+        """
+        if not 'sort' in request.GET:
+            return(None)
+
+        # Sort requires a list of sort paramaters, which is a tuple of key + direction
+        # In order to maintain consistency, we will attempt to follow Django/Tastypie syntax
+        # of a signed field/list of fields
+        fields_to_sort = request.GET['sort'].split(',')
+        sorting = []
+        for field in fields_to_sort:
+            if '-' in field:
+                order = -1
+                field = field.replace('-', '')
+            else:
+                order = 1
+            sorting.append((field, order, ))
+
+        return(sorting)
 
     def filter_query_to_mongo(self, value, field_name, filters, filter_expr,
             filter_type):
@@ -219,7 +259,6 @@ class MongoResource(Resource):
 
                 # field_name is the first item in the list
                 field_name = filter_bits.pop(0)
-
             # Checks to make sure the modifier is in self.query_terms
             # (Makes sure it's a valid modifier)
             # If it's valid, it changes the filter_type to the query_term
@@ -279,7 +318,7 @@ class MongoResource(Resource):
 
         if bundle_or_obj is not None:
             url_name = 'api_dispatch_detail'
-            kwargs['pk'] = bundle_or_obj.obj.get('_id').__str__()
+            kwargs['pk'] = bundle_or_obj.obj.pk
 
         try:
             return self._build_reverse_url(url_name, kwargs=kwargs)

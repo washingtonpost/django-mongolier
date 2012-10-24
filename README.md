@@ -55,6 +55,16 @@ Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API 
 
 # Changelog
 
+## 0.3.2 ##
+
+### Bugfixes ###
+
+* [api.py] Fixed problem with pk defaulting to None on Mongo Storage object
+
+### Features ###
+
+* [api.py] Added sorting via ``sort`` parameter
+
 ## 0.3.0
 
 ### Backwards incompatible changes
