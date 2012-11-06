@@ -89,7 +89,6 @@ class MongoResource(Resource):
             mongo_list_cursor = self._meta.connection.api\
                                     .find(applicable_filters)
         else:
-            print sorting
             mongo_list_cursor = self._meta.connection.api\
                                     .find(applicable_filters)\
                                     .sort(sorting)
@@ -229,7 +228,6 @@ class MongoResource(Resource):
 
         # Create a blank dictionary to store a filter dictionary
         qs_filters = {}
-
         # Iterate over the filters passed by the client
         for filter_expr, value in filters.items():
             # Sets the default filter type.  If no other modifiers are passed
@@ -259,6 +257,7 @@ class MongoResource(Resource):
 
                 # field_name is the first item in the list
                 field_name = filter_bits.pop(0)
+
             # Checks to make sure the modifier is in self.query_terms
             # (Makes sure it's a valid modifier)
             # If it's valid, it changes the filter_type to the query_term
@@ -271,8 +270,7 @@ class MongoResource(Resource):
 
             # Add the filter to the dictionary
             qs_filters.update(query)
-
-            return(qs_filters)
+        return(qs_filters)
 
     def build_bundle(self, obj=None, data=None, request=None):
         """
