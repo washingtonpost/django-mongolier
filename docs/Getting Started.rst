@@ -7,7 +7,7 @@ Make a connection
 ::
 
     from mongolier import Connection
-    my_connection_object = Connection(database='face', collection='palm', auth='username:pass')
+    my_connection_object = Connection(db='face', collection='palm', auth='username:pass')
 
 Query
 -----
