@@ -147,7 +147,7 @@ class BaseConnection(object):
         # Handle the following exceptions, if retries is less than what is
         # passed into this method, attempt to connect again.  Otherwise,
         # raise the proper exception.
-        except AutoReconnect, error_message:
+        except AutoReconnect as error_message:
             time.sleep(2)
             retries += 1
 
@@ -157,7 +157,7 @@ class BaseConnection(object):
                 raise ConnectionFailure('Max number of retries (%s) reached. Error: %s'\
                                          % (self.max_retries, error_message))
 
-        except OperationFailure, error_message:
+        except OperationFailure as error_message:
             time.sleep(2)
             retries += 1
 
