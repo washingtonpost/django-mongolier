@@ -12,5 +12,5 @@ __author_email__ = ['bartzj@washpost.com', 'bowersj@washpost.com']
 try:
     from mongolier.db import Connection
     from mongolier.utils.convert import ConvertDecimal
-except ImportError, e:
+except (ImportError), e:
     warnings.warn(str(e))
