@@ -1,0 +1,15 @@
+language: python
+python:
+  - "2.7"
+
+install:
+    - python mongolier/setup.py install
+
+services:
+    - mongodb
+
+script:
+    - runtests
+
+env:
+    - DJANGO_SETTINGS_MODULE='tests.settings'
