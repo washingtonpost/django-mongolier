@@ -5,7 +5,7 @@ A generic settings for testing.
 """
 from mongolier import Connection
 
-MONGO_TEST_CONN = Connection(db='test', collection='mongolier')
+MONGO_TEST_CONN = Connection(db='test', collection='mongolier_test')
 
 DATABASE_ENGINE = 'sqlite3'
 DATABASE_NAME = 'mongolier.sqlite'
