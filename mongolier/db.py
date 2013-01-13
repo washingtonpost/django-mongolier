@@ -118,7 +118,8 @@ class BaseConnection(object):
         A method to handle generic connections created via __getattribute__ and
         __getitem__.
         """
-        self._mode = 'api'
+        if not self._mode:
+            self._mode = 'api'
         if self.override:
             self.collection = collection
 
@@ -182,7 +183,7 @@ class BaseConnection(object):
                                 was subclassed improperly.")
         if mode is not self._mode:
             raise InvalidMode(".The mode set does not match the mode requested. \n\
-                                This connection object already used %s" % mode)
+                                This connection object already used `%s`" % mode)
 
     def _connect(self, collection=None):
         """
@@ -244,10 +245,12 @@ class Connection(BaseConnection):
 
     @property
     def api(self):
-        self._mode = 'api'
+        if not self._mode:
+            self._mode = 'api'
         return(self._connect())
 
     @property
     def fs(self):
-        self._mode = 'gridfs'
+        if not self._mode:
+            self._mode = 'gridfs'
         return(self._gridfs())
