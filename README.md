@@ -2,6 +2,8 @@
 
 A lightweight toolkit for integrating MongoDB with Django
 
+[![Build Status](https://travis-ci.org/washingtonpost/django-mongolier.png)](https://travis-ci.org/washingtonpost/django-mongolier)
+
 ## Why?
 
 django-mongolier is a wrapper for `pymongo` that adds many of the happy django bits for using mongodb in a normal django app.

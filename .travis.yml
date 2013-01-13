@@ -5,6 +5,7 @@ python:
 install:
     - python setup.py install
     - pip install django
+    - pip install django-tastypie
 
 services:
     - mongodb
