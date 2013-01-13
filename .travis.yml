@@ -9,7 +9,7 @@ services:
     - mongodb
 
 script:
-    - runtests
+    - ./runtests
 
 env:
     - DJANGO_SETTINGS_MODULE='tests.settings'
