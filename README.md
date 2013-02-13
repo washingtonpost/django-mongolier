@@ -25,7 +25,7 @@ query syntax of `pymongo` in.
 
 v 0.4.0 will hopefully be the final pre-production version. I expect to move to 1.0 soon.
 
-* move db.py to pymongo's MongoClient API
+* make modules to respect pymongo's MongoClient API and db.py connection
 * improved views, with more facets and mixins
 * improved management commands
 * full test suite
@@ -37,8 +37,8 @@ v 0.4.0 will hopefully be the final pre-production version. I expect to move to 
 
 ```python
 
-from mongolier import PersistentConnection
-my_connection_object = PersistentConnection(database='face', collection='palm', auth='my_user:awesome_password')
+from mongolier import Connection
+my_connection_object = PersistentConnection(database='face', collection='palm', username='my_user', password='awesome_password')
 my_connection_object.api.find({'query_param': 'query_value'})
 
 ```

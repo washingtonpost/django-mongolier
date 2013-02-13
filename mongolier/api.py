@@ -11,6 +11,8 @@ from django.core.urlresolvers import NoReverseMatch
 from tastypie.resources import Resource, DeclarativeMetaclass
 from tastypie.bundle import Bundle
 from bson.objectid import ObjectId
+from pymongo.common import BaseObject
+from mongolier.db import Connection
 
 
 class MongoStorageObject(dict):
@@ -79,6 +81,12 @@ class MongoResource(Resource):
     class Meta:
         connection = None
 
+    def do_query(self):
+        if isinstance(self.connection, BaseObject):
+            return(self.connection)
+        if isinstance(self.connection, Connection):
+            return(self.connection.api)
+
     def apply_filters(self, request, applicable_filters):
         """
         Final method that applies the filters built in ``build_filters``
@@ -86,10 +94,10 @@ class MongoResource(Resource):
         """
         sorting = self.get_sorting(request)
         if not sorting:
-            mongo_list_cursor = self._meta.connection.api\
+            mongo_list_cursor = self._meta.do_query()\
                                     .find(applicable_filters)
         else:
-            mongo_list_cursor = self._meta.connection.api\
+            mongo_list_cursor = self._meta.do_query()\
                                     .find(applicable_filters)\
                                     .sort(sorting)
 
@@ -344,7 +352,7 @@ class MongoResource(Resource):
         """
         A method required to get a single object
         """
-        return(self._meta.connection.api.find_one(ObjectId(kwargs['pk'])))
+        return(self._meta.do_query().find_one(ObjectId(kwargs['pk'])))
 
     def obj_create(self, bundle, request=None, **kwargs):
         """
@@ -355,7 +363,7 @@ class MongoResource(Resource):
 
         bundle = self.full_hydrate(bundle)
 
-        self._meta.connection.api.save(bundle.obj, safe=True)
+        self._meta.do_query().save(bundle.obj, safe=True)
 
         return(bundle)
 
@@ -373,7 +381,7 @@ class MongoResource(Resource):
         that output.
 
         """
-        self._meta.connection.api.remove(**kwargs)
+        self._meta.do_query().remove(**kwargs)
 
     def obj_delete_list(self, request=None, **kwargs):
         """
