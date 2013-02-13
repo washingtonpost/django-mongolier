@@ -1,10 +1,12 @@
 from django.conf.urls.defaults import *
 from tastypie.api import Api
-from api import TestResource
+from api import MongolierTestResource, MongoClientTestResource
 
 api = Api('test')
 
-api.register(TestResource())
+api.register(MongolierTestResource())
+api.register(MongoClientTestResource())
+
 
 urlpatterns = patterns('',
     (r'^api/', include(api.urls)),

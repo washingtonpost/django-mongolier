@@ -78,6 +78,11 @@ class TestAPI(TestCase):
         # Destroy data
         settings.MONGO_TEST_CONN.api.remove({'mongolier-api-test': 1})
 
+        # Test a pymongo Client obj GET response
+        get_response = self.client.get('/api/test/test_pymongo_client_obj/?format=json')
+        self.assertEqual(get_response.status_code, 200)
+
+
     def test_list(self):
         """
         Test creating an object in Mongo

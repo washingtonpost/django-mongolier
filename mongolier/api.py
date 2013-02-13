@@ -82,10 +82,10 @@ class MongoResource(Resource):
         connection = None
 
     def do_query(self):
-        if isinstance(self.connection, BaseObject):
-            return(self.connection)
-        if isinstance(self.connection, Connection):
-            return(self.connection.api)
+        if isinstance(self._meta.connection, BaseObject):
+            return(self._meta.connection)
+        if isinstance(self._meta.connection, Connection):
+            return(self._meta.connection.api)
 
     def apply_filters(self, request, applicable_filters):
         """
@@ -94,10 +94,10 @@ class MongoResource(Resource):
         """
         sorting = self.get_sorting(request)
         if not sorting:
-            mongo_list_cursor = self._meta.do_query()\
+            mongo_list_cursor = self.do_query()\
                                     .find(applicable_filters)
         else:
-            mongo_list_cursor = self._meta.do_query()\
+            mongo_list_cursor = self.do_query()\
                                     .find(applicable_filters)\
                                     .sort(sorting)
 
@@ -352,7 +352,7 @@ class MongoResource(Resource):
         """
         A method required to get a single object
         """
-        return(self._meta.do_query().find_one(ObjectId(kwargs['pk'])))
+        return(self.do_query().find_one(ObjectId(kwargs['pk'])))
 
     def obj_create(self, bundle, request=None, **kwargs):
         """
@@ -363,7 +363,7 @@ class MongoResource(Resource):
 
         bundle = self.full_hydrate(bundle)
 
-        self._meta.do_query().save(bundle.obj, safe=True)
+        self.do_query().save(bundle.obj, safe=True)
 
         return(bundle)
 
@@ -381,7 +381,7 @@ class MongoResource(Resource):
         that output.
 
         """
-        self._meta.do_query().remove(**kwargs)
+        self.do_query().remove(**kwargs)
 
     def obj_delete_list(self, request=None, **kwargs):
         """

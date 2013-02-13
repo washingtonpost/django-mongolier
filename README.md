@@ -66,6 +66,7 @@ Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API 
 
 ### Features ###
 
+* [api.py] Now respects pymongo.MongoClient api as well as mongolier.db.Connection 
 * [.] Added travis test suite support
 * [views.py] Added Paginated View
 
