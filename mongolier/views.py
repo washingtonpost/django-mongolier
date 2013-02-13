@@ -8,13 +8,17 @@ try:
     from django.db.settings import DEFAULT_PAGINATION
 except ImportError:
     DEFAULT_PAGINATION = 25
-
+from django.core.paginator import Paginator
 from django.views.generic.base import View
+from django.views.generic.list import ListView as GenericListView
 from django.http import Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
 
 
 class BaseMongoMixin(object):
+    """
+    Base Mixin object.
+    """
     connection = None
     sort = None
     query = None
@@ -30,7 +34,7 @@ class BaseMongoMixin(object):
         return context
 
     def get_template_name(self):
-        if self.template_name == None:
+        if not self.template_name:
             return u'%s/%s_%s.html' % (self.connection.collection, self.connection.collection, self.class_type)
         else:
             return self.template_name
@@ -61,6 +65,9 @@ class BasePaginatedMongoMixin(BaseMongoMixin):
 
 
 class DetailView(BaseMongoMixin, View):
+    """
+    A Detail
+    """
     class_type = 'detail'
 
     def get_object(self, *args, **kwargs):
@@ -105,10 +112,32 @@ class DetailView(BaseMongoMixin, View):
             return HttpResponseRedirect(self.get_object()[0])
 
 
-class PagelessListView(BaseMongoMixin, View):
+class ListView(BaseMongoMixin, View):
 
+    #: View type
     class_type = 'list'
+    #: Determines whether or not to add the mongo `_id` param to output
     show_id = False
+
+    def _get_query_list(self, mongo_iterable):
+        """
+        Iterates over a mongo iterable to provide a list for consumption in the
+        view
+        """
+        query_list = []
+
+        # Append each item to the query_list.
+        for item in mongo_iterable:
+            item_dict = dict(item)
+            # If show id is set, adds the mongo `_id` to the key `id`
+            if self.show_id:
+                item_dict['id'] = str(item['_id'])
+
+            # Remove this key always, it is very un-django
+            item_dict.pop('_id')
+            query_list.append(item_dict)
+
+        return(query_list)
 
     def get_list(self, *args, **kwargs):
         """
@@ -117,19 +146,10 @@ class PagelessListView(BaseMongoMixin, View):
         if self.query:
             kwargs.update(self.query)
         # Get the total count and the number of pages.
-        obj_query = self.connection.api.find(kwargs, sort=self.sort)
+        mongo_iterable = self.connection.api.find(kwargs, sort=self.sort)
 
-        query_list = []
+        query_list = self._get_query_list(mongo_iterable)
 
-        # Append each item to the query_list.
-        for item in obj_query:
-            item_dict = {}
-            item_as_kwargs = dict(item)
-            item_dict.update(**item_as_kwargs)
-            if self.show_id:
-                item_dict['id'] = str(item['_id'])
-            item_dict.pop('_id')
-            query_list.append(item_dict)
         # Return the query list, and set the type of return to query.
         return query_list, 'query'
 
@@ -140,16 +160,15 @@ class PagelessListView(BaseMongoMixin, View):
         Returns a redirect if there's an issue with the page number.
         """
 
+        query_list, query_type = self.get_list()
         # If the type of response is a query:
-        if self.get_list()[1] == 'query':
+        if query_type == 'query':
 
             # Set the results to the first part of the tuple.
-            self.results = self.get_list(*args, **kwargs)[0]
+            results = self.get_list(*args, **kwargs)[0]
 
-            # If there are no results ...
-            if len(self.results) == 0:
-
-                #... raise a 404.
+            # If there are no results raise a 404.
+            if not results:
                 raise Http404(u"List is empty.")
 
             # If there are results, set the context data.
@@ -158,129 +177,82 @@ class PagelessListView(BaseMongoMixin, View):
             # Return render_to_response with the context data.
             return self.render_to_response(context)
 
-        # Otherwise, if the response is a redirect ...
-        elif self.get_list()[1] == 'redirect':
-
-            #... execute the redirect.
-            return HttpResponseRedirect(self.get_list()[0])
+        elif query_type == 'redirect':
+            return HttpResponseRedirect(query_list)
 
 
-class ListView(BasePaginatedMongoMixin, View):
+class PaginatedListView(BasePaginatedMongoMixin, ListView, GenericListView):
     """
     Provides a generic list view for MongoDB.
     """
-    # Set the class type.
-    class_type = 'list'
+
+    def _redirect(self, page):
+        # short circuit the process and return a redirect URL while setting the type as a redirect.
+        redirect_url = '%s?page=%s' % (self.request.META['PATH_INFO'], page)
+        return redirect_url, 'redirect'
 
     def get_list(self, *args, **kwargs):
         """
         Provides a list of JSON objects from a MongoConnection class.
         """
-        if self.query:
-            kwargs.update(self.query)
-        # Get the total count and the number of pages.
-        total_count = self.connection.api.find(kwargs, sort=self.sort).count()
+        import pdb;pdb.set_trace()
+        # if self.query:
+        #     kwargs.update(self.query)
+        # # Get the total count and the number of pages.
+        # total_count = self.connection.api.find(kwargs, sort=self.sort).count()
 
-        if (total_count % self.pagination_limit) > 0:
-            self.pages = (total_count / self.pagination_limit) + 1
-        else:
-            self.pages = (total_count / self.pagination_limit)
+        # self.pages = total_count / self.pagination_limit
 
-        if self.pages == 1:
-            self.page_range = [1]
-        else:
-            self.page_range = range(1, self.pages + 1)
+        # if total_count % self.pagination_limit:
+        #     self.pages + 1
 
-        try:
-            # Try to get the page from the URL.
-            self.page = int(self.request.GET['page'])
+        # if self.pages == 1:
+        #     self.page_range = [1]
+        # else:
+        #     self.page_range = range(1, self.pages + 1)
 
-        except KeyError:
+        # # Try to get the page from the URL.
+        # if 'page' in self.request.GET:
+        #     self.page = int(self.request.GET['page'])
 
-            # If there's no page in the URL, set the page to 1.
-            self.page = 1
-            self.offset = 0
+        # # If there's no page in the URL, set the page to 1.
+        # else:
+        #     self.page = 1
+        #     self.offset = 0
 
-        # If we can get the page from the URL, calculate the offset.
-        # First, test if the current page is 0.
-        if self.page == 0:
+        # # Redirect invalid pages to their proper counterpart.
+        # if self.page == 0:
+        #     self._redirect(1)
 
-            # If so, short circuit the process and return a redirect URL while setting the type as a redirect.
-            redirect_url = '%s?page=%s' % (self.request.META['PATH_INFO'], 1)
-            return redirect_url, 'redirect'
+        # elif self.page > self.pages:
+        #     self._redirect(self.pages)
 
-        # Next, check if the current page is less than the total number of pages.
-        elif self.page <= self.pages:
+        # else:
+        #     # If so, set the offset to the 1-indexed page number * the pagination limit.
+        #     self.offset = (self.page - 1) * self.pagination_limit
 
-            # If so, set the offset to the 1-indexed page number * the pagination limit.
-            self.offset = (self.page - 1) * self.pagination_limit
+        #     # Set the previous/next page numbers.
+        #     if self.page == 1 and self.page == self.pages:
+        #         pass
 
-            # Set the previous/next page numbers.
-            if self.page == 1 and self.page == self.pages:
-                pass
+        #     elif self.page == 1:
+        #         self.next_page_number = 2
 
-            elif self.page == 1:
-                self.next_page_number = 2
+        #     elif self.page == self.pages:
+        #         self.previous_page_number = self.page - 1
 
-            elif self.page == self.pages:
-                self.previous_page_number = self.page - 1
+        #     else:
+        #         self.next_page_number = self.page + 1
+        #         self.previous_page_number = self.page - 1
 
-            else:
-                self.next_page_number = self.page + 1
-                self.previous_page_number = self.page - 1
+        # # Send along the connection query with the sort attached.
+        # mongo_iterable = self.connection.api.find(kwargs,
+        #                     limit=self.pagination_limit,
+        #                     skip=self.offset,
+        #                     sort=self.sort
+        #                 )
 
-        # Finally, check if the current page is greater than the total number of pages.
-        elif self.page > self.pages:
+        # query_list = self._get_query_list(mongo_iterable)
 
-            # If so, short circuit the process and return a redirect URL while setting the type as a redirect.
-            redirect_url = '%s?page=%s' % (self.request.META['PATH_INFO'], self.pages)
-            return redirect_url, 'redirect'
-
-        # Send along the connection query with the sort attached.
-        obj_query = self.connection.api.find(kwargs, limit=self.pagination_limit, skip=self.offset, sort=self.sort)
-
-        # Set up a query list.
-        query_list = []
-
-        # Append each item to the query_list.
-        for item in obj_query:
-            item_dict = {}
-            item_as_kwargs = dict(item)
-            item_dict.update(**item_as_kwargs)
-            item_dict['id'] = str(item['_id'])
-            item_dict.pop('_id')
-            query_list.append(item_dict)
-
-        # Return the query list, and set the type of return to query.
-        return query_list, 'query'
-
-    def get(self, request, *args, **kwargs):
-        """
-        Overrides the built in get() function on the base View class.
-        Gets the object and the context.
-        Returns a redirect if there's an issue with the page number.
-        """
-
-        # If the type of response is a query:
-        if self.get_list()[1] == 'query':
-
-            # Set the results to the first part of the tuple.
-            self.results = self.get_list()[0]
-
-            # If there are no results ...
-            if len(self.results) == 0:
-
-                #... raise a 404.
-                raise Http404(u"List is empty.")
-
-            # If there are results, set the context data.
-            context = self.get_context_data(**kwargs)
-
-            # Return render_to_response with the context data.
-            return self.render_to_response(context)
-
-        # Otherwise, if the response is a redirect ...
-        elif self.get_list()[1] == 'redirect':
-
-            #... execute the redirect.
-            return HttpResponseRedirect(self.get_list()[0])
+        # # Return the query list, and set the type of return to query.
+        # return query_list, 'query'
