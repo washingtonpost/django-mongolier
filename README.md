@@ -25,6 +25,7 @@ query syntax of `pymongo` in.
 
 v 0.4.0 will hopefully be the final pre-production version. I expect to move to 1.0 soon.
 
+* move db.py to pymongo's MongoClient API
 * improved views, with more facets and mixins
 * improved management commands
 * full test suite
@@ -56,6 +57,22 @@ Check out the [API docs](http://washingtonpost.github.com/django-mongolier "API 
 
 
 # Changelog
+
+## 0.4.0 ##
+
+### Bugfixes ###
+
+* [tests] improved tests
+
+### Features ###
+
+* [.] Added travis test suite support
+* [views.py] Added Paginated View
+
+### Backwards incompatible changes ###
+
+* [views.py] Gave ListView options to paginate
+* [views.py | removed] PagelessListView
 
 ## 0.3.2 ##
 
