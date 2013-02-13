@@ -21,7 +21,9 @@ query syntax of `pymongo` in.
 * utils - a series of classes to filter python objects so they can be inserted into mongo
 * fixture creation and database 'syncing' via standard Django management commands
 
-## RoadMap (v 0.4.0)
+## RoadMap 
+
+### v 0.4.0
 
 v 0.4.0 will hopefully be the final pre-production version. I expect to move to 1.0 soon.
 
@@ -30,6 +32,10 @@ v 0.4.0 will hopefully be the final pre-production version. I expect to move to 
 * improved management commands
 * full test suite
 * full documentation
+
+### v 1.0.0
+
+* django 1.5/tastypie 1.0
 
 ## Getting started
 
