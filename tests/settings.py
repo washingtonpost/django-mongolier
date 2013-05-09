@@ -13,6 +13,7 @@ TEST_PYMONGO_CLIENT_OBJ = MongoClient().test.mongolier_test
 DATABASE_ENGINE = 'sqlite3'
 DATABASE_NAME = 'mongolier.sqlite'
 TEST_DATABASE_NAME = 'mongolier-test.sqlite'
+# AUTH_USER_MODEL = 'django.contrib.auth.models.User'
 
 # for forwards compatibility
 DATABASES = {
@@ -31,5 +32,6 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 INSTALLED_APPS = (
+    'django.contrib.auth',
     'tests.testapp',
 )
