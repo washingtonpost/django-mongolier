@@ -6,7 +6,10 @@ A lightweight implementation of pymongo and django-tastypie
 """
 import json
 
-from django.db.models.sql.constants import LOOKUP_SEP
+try:
+    from django.db.models.constants import LOOKUP_SEP
+except ImportError:
+    from django.db.models.sql.constants import LOOKUP_SEP
 from django.core.urlresolvers import NoReverseMatch
 from tastypie.resources import Resource, DeclarativeMetaclass
 from tastypie.bundle import Bundle
