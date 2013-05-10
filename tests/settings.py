@@ -31,5 +31,6 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 INSTALLED_APPS = (
+    'django.contrib.auth',
     'tests.testapp',
 )
