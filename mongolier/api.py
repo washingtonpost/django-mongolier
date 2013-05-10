@@ -334,30 +334,30 @@ class MongoResource(Resource):
         except NoReverseMatch:
             return ''
 
-    def obj_get_list(self, request=None, **kwargs):
+    def obj_get_list(self, bundle, **kwargs):
         """
         A method to to enable filtering on a list
         """
         filters = {}
 
-        if hasattr(request, 'GET'):
+        if hasattr(bundle.request, 'GET'):
             # Grab a mutable copy.
-            filters = request.GET.copy()
+            filters = bundle.request.GET.copy()
 
         # Update with the provided kwargs.
         filters.update(kwargs)
 
         applicable_filters = self.build_filters(filters=filters)
 
-        return(self.apply_filters(request, applicable_filters))
+        return(self.apply_filters(bundle.request, applicable_filters))
 
-    def obj_get(self, request=None, **kwargs):
+    def obj_get(self, bundle, **kwargs):
         """
         A method required to get a single object
         """
         return(self.do_query().find_one(ObjectId(kwargs['pk'])))
 
-    def obj_create(self, bundle, request=None, **kwargs):
+    def obj_create(self, bundle, **kwargs):
         """
         A method to create an object
         """
@@ -374,9 +374,9 @@ class MongoResource(Resource):
         """
         A method to update an object
         """
-        return(self.obj_create(bundle, request, **kwargs))
+        return(self.obj_create(bundle, request=bundle.request, **kwargs))
 
-    def obj_delete(self, request=None, **kwargs):
+    def obj_delete(self, bundle, **kwargs):
         """
         A method to delete a single object.
 
@@ -386,13 +386,13 @@ class MongoResource(Resource):
         """
         self.do_query().remove(**kwargs)
 
-    def obj_delete_list(self, request=None, **kwargs):
+    def obj_delete_list(self, bundle, **kwargs):
         """
         A method to delete an entire list of objects
 
         Same pattern as :meth:`obj_delete <obj_delete>`
         """
-        self.obj_delete(request, **kwargs)
+        self.obj_delete(bundle.request, **kwargs)
 
     def rollback(self, bundles):
         """
